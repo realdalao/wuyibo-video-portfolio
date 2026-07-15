@@ -954,10 +954,10 @@ footer,
     letter-spacing: 0.08em;
   }
 
-  .modal-info strong {
+.modal-info strong {
     color: #fff;
     font-size: 22px;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.1;
   }
 
@@ -966,6 +966,16 @@ footer,
     color: #a9a9a9;
     font-size: 13px;
     line-height: 1.5;
+  }
+
+  .modal-info .modal-award {
+    color: #f2f2f2;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .modal-info .modal-description {
+    color: #c6c6c6;
   }
 
   .modal-info dl {
@@ -986,6 +996,30 @@ footer,
     line-height: 1.45;
   }
 
+  .modal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .modal-links a {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 12px;
+    text-decoration: none;
+  }
+
+  .modal-links a:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
   .modal-shell .modal-footer {
     grid-column: 1 / -1;
     grid-row: 2;
@@ -996,18 +1030,59 @@ footer,
 /* Final hero spacing override. */
 @media (min-width: 1024px) {
   .editor-hero {
-    min-height: 760px;
+    min-height: 660px;
+    padding-top: 42px;
+    padding-bottom: 42px;
   }
 
   .editor-hero .hero-intro {
-    bottom: 178px;
+    bottom: 118px;
   }
 
   .editor-hero .portrait-frame {
-    top: 70px;
+    top: 42px;
     width: 316px;
   }
+
+  .editor-hero .hero-sidecopy {
+    bottom: 42px;
+    right: 16px;
+  }
 }
+
+/* Final alignment pass for the hero's right rail. */
+@media (min-width: 1024px) {
+  .editor-hero .portrait-frame,
+  .editor-hero .hero-sidecopy {
+    right: 0;
+  }
+
+  .editor-hero .hero-sidecopy {
+    display: flex;
+    width: 316px;
+    align-items: flex-end;
+    flex-direction: column;
+    text-align: right;
+  }
+
+  .editor-hero .hero-sidecopy .hero-summary {
+    width: 100%;
+    max-width: none;
+    margin-right: 0;
+    text-align: right;
+  }
+
+  .editor-hero .hero-sidecopy .hero-summary span {
+    width: 100% !important;
+    text-align: right;
+  }
+
+  .editor-hero .hero-sidecopy .hero-cta {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
 
 /* Final experience layout: full-width editorial timeline. */
 .editor-experience {
@@ -1156,6 +1231,42 @@ footer,
 
   .editor-hero .hero-sidecopy .hero-cta {
     justify-content: flex-end;
+  }
+}
+
+/* Compact the desktop hero without changing its established right-rail alignment. */
+@media (min-width: 1024px) {
+  .editor-hero {
+    min-height: 660px;
+    padding-top: 42px;
+    padding-bottom: 42px;
+  }
+
+  .editor-hero .hero-intro {
+    bottom: 118px;
+  }
+
+  .editor-hero .portrait-frame {
+    top: 42px;
+  }
+
+.editor-hero .hero-sidecopy {
+    right: 16px;
+    bottom: 42px;
+  }
+}
+
+/* Final hero portrait sizing: preserve the source ratio and align the right rail. */
+@media (min-width: 1024px) {
+  .editor-hero .portrait-frame {
+    right: 0;
+    width: 685px;
+    aspect-ratio: 896 / 1200;
+  }
+
+  .editor-hero .hero-sidecopy {
+    right: 0;
+    text-align: right;
   }
 }
 
@@ -2162,7 +2273,7 @@ footer p {
   }
 
   .category-section .video-caption strong {
-    font-size: 17px;
+    font-size: 14px;
   }
 
   /* Portrait cards keep their column width but recover the source frame ratio. */
@@ -2624,6 +2735,7 @@ footer p {
 .video-card {
   min-width: 0;
   margin: 0;
+  contain: layout paint;
 }
 
 .video-card .video-tile {
@@ -2641,7 +2753,7 @@ footer p {
   overflow: hidden;
   color: var(--ink);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.25;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -2708,7 +2820,7 @@ footer p {
   }
 
   .video-caption strong {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .video-caption small {
@@ -3285,10 +3397,10 @@ footer p {
     letter-spacing: 0.08em;
   }
 
-  .modal-info strong {
+.modal-info strong {
     color: #fff;
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 400;
   }
 
   .modal-info p,
@@ -3297,6 +3409,30 @@ footer p {
     color: #aaa;
     font-size: 12px;
     line-height: 1.45;
+  }
+
+  .modal-info .modal-award {
+    color: #f2f2f2;
+    font-weight: 500;
+  }
+
+  .modal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .modal-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 12px;
+    text-decoration: none;
   }
 
   .modal-info dl {
@@ -3330,6 +3466,8 @@ footer p {
 /* Final reference-scale pass: a 1/4 title rail and 3/4 media rail. */
 .category-section {
   padding: 48px 0 64px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 960px;
 }
 
 .category-section + .category-section {
@@ -3393,7 +3531,7 @@ footer p {
 
   .category-section .video-caption strong {
     order: 1;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.25;
   }
 }
@@ -3423,7 +3561,7 @@ footer p {
   }
 
   .category-section .video-caption strong {
-    font-size: 17px;
+    font-size: 14px;
   }
 }
 
@@ -3439,5 +3577,42 @@ footer p {
   .editor-hero .portrait-frame {
     top: 70px;
     width: 316px;
+  }
+}
+
+/* Compact the desktop hero without changing its established right-rail alignment. */
+@media (min-width: 1024px) {
+  .editor-hero {
+    min-height: 660px;
+    padding-top: 42px;
+    padding-bottom: 42px;
+  }
+
+  .editor-hero .hero-intro {
+    bottom: 118px;
+  }
+
+  .editor-hero .portrait-frame {
+    top: 42px;
+  }
+
+  .editor-hero .hero-sidecopy {
+    right: 16px;
+    bottom: 42px;
+  }
+}
+
+/* Final hero portrait sizing: preserve the source ratio and align the right rail. */
+@media (min-width: 1024px) {
+  .editor-hero .portrait-frame {
+    top: 42px;
+    right: 0;
+    width: 201.6px;
+    aspect-ratio: 896 / 1200;
+  }
+
+  .editor-hero .hero-sidecopy {
+    right: 0;
+    text-align: right;
   }
 }
