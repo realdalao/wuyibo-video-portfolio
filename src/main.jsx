@@ -12,6 +12,11 @@ import "./experience.css";
 import "./footer.css";
 
 const portfolioSource = "https://fcnapthanwru.feishu.cn/wiki/VNwkwSqvriUfmrklQQNc2mNanJE?from=from_copylink";
+const mediaBaseUrl = (import.meta.env.VITE_MEDIA_BASE_URL || "https://pub-c8843e00706b41c28fcaf1a5586b7161.r2.dev").replace(/\/$/, "");
+
+function resolveMediaUrl(path) {
+  return path?.startsWith("/") ? `${mediaBaseUrl}${path}` : path;
+}
 
 const highlights = [
   { label: "ReelShort 短剧", href: "#reelshort", copy: "AIGC 短剧生产与交付" },
@@ -662,7 +667,15 @@ function App() {
         if (!response.ok) throw new Error("Unable to load media manifest");
         return response.json();
       })
-      .then(setManifest)
+      .then((data) => {
+        const resolvedManifest = Object.fromEntries(
+          Object.entries(data).map(([category, videos]) => [
+            category,
+            videos.map((video) => ({ ...video, src: resolveMediaUrl(video.src) }))
+          ])
+        );
+        setManifest(resolvedManifest);
+      })
       .catch(() => setManifest({}));
   }, []);
 
