@@ -491,12 +491,15 @@ const Works = memo(function Works({ manifest, onOpen }) {
 function VideoModal({ viewer, onClose, onChange }) {
   const closeButtonRef = useRef(null);
   const [failed, setFailed] = useState(false);
+  const [usingPreview, setUsingPreview] = useState(false);
   const { videos, index, collectionTitle } = viewer;
   const video = videos[index];
   const details = getVideoDetails(video);
+  const playbackSrc = usingPreview ? `/previews/${video.id}.mp4` : video.src;
 
   useEffect(() => {
     setFailed(false);
+    setUsingPreview(false);
   }, [video.id]);
 
   useEffect(() => {
@@ -537,7 +540,16 @@ function VideoModal({ viewer, onClose, onChange }) {
           {failed ? (
             <div className="player-error"><Play size={30} /><strong>暂时无法播放此视频</strong><span>请检查本地素材文件是否完整。</span></div>
           ) : (
-            <video key={video.src} src={video.src} poster={video.poster} controls autoPlay playsInline preload="metadata" onError={() => setFailed(true)} />
+            <video
+              key={playbackSrc}
+              src={playbackSrc}
+              poster={video.poster}
+              controls
+              autoPlay
+              playsInline
+              preload="metadata"
+              onError={() => usingPreview ? setFailed(true) : setUsingPreview(true)}
+            />
           )}
         </div>
         <aside className="modal-info">
