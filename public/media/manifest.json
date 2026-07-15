@@ -1,0 +1,430 @@
+{
+  "ai": [
+    {
+      "id": "ai-manga-01",
+      "title": "灯神流浪汉救麻袋女",
+      "src": "/media/ai-manga/ai-manga-01.mp4",
+      "poster": "/media/ai-manga/ai-manga-01.jpg",
+      "width": 720,
+      "height": 1280,
+      "duration": 27,
+      "orientation": "portrait"
+    },
+    {
+      "id": "ai-manga-02",
+      "title": "狼人女主海报",
+      "src": "/media/ai-manga/ai-manga-02.mp4",
+      "poster": "/media/ai-manga/ai-manga-02.jpg",
+      "width": 720,
+      "height": 1280,
+      "duration": 8,
+      "orientation": "portrait"
+    },
+    {
+      "id": "ai-manga-03",
+      "title": "老头儿阿拉丁神灯许愿(Subtitles)",
+      "src": "/media/ai-manga/ai-manga-03.mp4",
+      "poster": "/media/ai-manga/ai-manga-03.jpg",
+      "width": 720,
+      "height": 1280,
+      "duration": 15,
+      "orientation": "portrait"
+    },
+    {
+      "id": "ai-manga-04",
+      "title": "流落街头的父亲(subtitles)",
+      "src": "/media/ai-manga/ai-manga-04.mp4",
+      "poster": "/media/ai-manga/ai-manga-04.jpg",
+      "width": 720,
+      "height": 1280,
+      "duration": 88,
+      "orientation": "portrait"
+    },
+    {
+      "id": "ai-manga-05",
+      "title": "女歌手假唱",
+      "src": "/media/ai-manga/ai-manga-05.mp4",
+      "poster": "/media/ai-manga/ai-manga-05.jpg",
+      "width": 720,
+      "height": 1280,
+      "duration": 18,
+      "orientation": "portrait"
+    },
+    {
+      "id": "ai-manga-06",
+      "title": "日漫小男孩揪小女孩辫子",
+      "src": "/media/ai-manga/ai-manga-06.mp4",
+      "poster": "/media/ai-manga/ai-manga-06.jpg",
+      "width": 720,
+      "height": 1280,
+      "duration": 4,
+      "orientation": "portrait"
+    },
+    {
+      "id": "ai-manga-07",
+      "title": "亚洲小孩换成白人小孩武打动作片",
+      "src": "/media/ai-manga/ai-manga-07.mp4",
+      "poster": "/media/ai-manga/ai-manga-07.jpg",
+      "width": 720,
+      "height": 1280,
+      "duration": 15,
+      "orientation": "portrait"
+    },
+    {
+      "id": "ai-manga-08",
+      "title": "忠诚四男（subtitle）",
+      "src": "/media/ai-manga/ai-manga-08.mp4",
+      "poster": "/media/ai-manga/ai-manga-08.jpg",
+      "width": 720,
+      "height": 1280,
+      "duration": 38,
+      "orientation": "portrait"
+    }
+  ],
+  "academy": [
+    {
+      "id": "documentary-trailers-01",
+      "title": "《窗外是蓝星》1225",
+      "src": "/media/documentary-trailers/documentary-trailers-01.mp4",
+      "poster": "/media/documentary-trailers/documentary-trailers-01.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 39,
+      "orientation": "landscape"
+    },
+    {
+      "id": "documentary-trailers-02",
+      "title": "《方舟·布氏鲸》30s",
+      "src": "/media/documentary-trailers/documentary-trailers-02.mp4",
+      "poster": "/media/documentary-trailers/documentary-trailers-02.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 29,
+      "orientation": "landscape"
+    },
+    {
+      "id": "documentary-trailers-03",
+      "title": "《河湟三章》30s",
+      "src": "/media/documentary-trailers/documentary-trailers-03.mp4",
+      "poster": "/media/documentary-trailers/documentary-trailers-03.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 30,
+      "orientation": "landscape"
+    },
+    {
+      "id": "documentary-trailers-04",
+      "title": "《凌云壮志》 30s",
+      "src": "/media/documentary-trailers/documentary-trailers-04.mp4",
+      "poster": "/media/documentary-trailers/documentary-trailers-04.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 31,
+      "orientation": "landscape"
+    },
+    {
+      "id": "documentary-trailers-05",
+      "title": "《绿色星球2：城市天际线》30s版本1",
+      "src": "/media/documentary-trailers/documentary-trailers-05.mp4",
+      "poster": "/media/documentary-trailers/documentary-trailers-05.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 30,
+      "orientation": "landscape"
+    },
+    {
+      "id": "documentary-trailers-06",
+      "title": "《如何與莉迪亞交談？》30s",
+      "src": "/media/documentary-trailers/documentary-trailers-06.mp4",
+      "poster": "/media/documentary-trailers/documentary-trailers-06.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 30,
+      "orientation": "landscape"
+    },
+    {
+      "id": "documentary-trailers-07",
+      "title": "《正义的审判》 30s",
+      "src": "/media/documentary-trailers/documentary-trailers-07.mp4",
+      "poster": "/media/documentary-trailers/documentary-trailers-07.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 30,
+      "orientation": "landscape"
+    }
+  ],
+  "guangxi": [
+    {
+      "id": "guangxi-01",
+      "title": "4. 央视频-《甜美广西风物篇·坚果》 职位：编导+剪辑",
+      "src": "/media/guangxi/guangxi-01.mp4",
+      "poster": "/media/guangxi/guangxi-01.jpg",
+      "width": 864,
+      "height": 486,
+      "duration": 194,
+      "orientation": "landscape"
+    }
+  ],
+  "palace": [
+    {
+      "id": "palace-01",
+      "title": "【#我们的故宫 第二集预告】#沉浸式体验乾隆的一天 乾隆也爱喝奶茶、吃火锅？清朝皇帝“臂力榜”，谁是第一？当故宫文物走出宫墙，会以怎样的方式与世界对话？",
+      "src": "/media/palace/palace-01.mp4",
+      "poster": "/media/palace/palace-01.jpg",
+      "width": 1080,
+      "height": 1440,
+      "duration": 98,
+      "orientation": "portrait"
+    },
+    {
+      "id": "palace-02",
+      "title": "【#我们的故宫 第一集】“赛博”进宫，了解一下？新华社记者@大家好我是张扬 走进故宫，探访一支让文物“上网”的幕后团队。一起来看藻井上的盘龙“下凡”吧，感受老祖宗的顶级审美有",
+      "src": "/media/palace/palace-02.mp4",
+      "poster": "/media/palace/palace-02.jpg",
+      "width": 1280,
+      "height": 720,
+      "duration": 1720,
+      "orientation": "landscape"
+    },
+    {
+      "id": "palace-03",
+      "title": "故宫藻井“活”了？你可以永远相信老祖宗的审美！ 老祖宗的审美+现代数字技术，跟新华社记者@张扬 一起在香港故宫文化博物馆沉浸式感受藻井中的盘龙飞起来是什",
+      "src": "/media/palace/palace-03.mp4",
+      "poster": "/media/palace/palace-03.jpg",
+      "width": 1080,
+      "height": 1440,
+      "duration": 65,
+      "orientation": "portrait"
+    },
+    {
+      "id": "palace-04",
+      "title": "你看到的故宫数字文物是这样制作的？ 三维采集、二维码定位？新华社记者@张扬 揭秘故宫博物院里的数字文物如何制作！#故宫博物院 #故宫 #抖in博物馆 #我们的故宫 #",
+      "src": "/media/palace/palace-04.mp4",
+      "poster": "/media/palace/palace-04.jpg",
+      "width": 1080,
+      "height": 1440,
+      "duration": 112,
+      "orientation": "portrait"
+    },
+    {
+      "id": "palace-05",
+      "title": "在故宫修了50多年文物，他见证哪些变化？ 故宫博物院古书画修复专家徐建华：过去一件围裙、一双套袖，一干就是一辈子，现在每个部门都有科技含量，不是经验",
+      "src": "/media/palace/palace-05.mp4",
+      "poster": "/media/palace/palace-05.jpg",
+      "width": 1080,
+      "height": 1440,
+      "duration": 126,
+      "orientation": "portrait"
+    }
+  ],
+  "xiangxin": [
+    {
+      "id": "xiangxin-01",
+      "title": "【《向新而行｜广西篇》上集】哪个地方的水果难逃“十元三斤”的命运？《向新而行》目的地上新！这里的“水果自由”到底多自由，烹饪手法究竟多“任性”？",
+      "src": "/media/xiangxin/xiangxin-01.mp4",
+      "poster": "/media/xiangxin/xiangxin-01.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 2150,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiangxin-02",
+      "title": "【《向新而行｜广西篇》下集】在一望无际的甘蔗林学习剥叶，是种什么感受？还有关于古法红糖、非遗壮锦的新体验解锁！广西到底还有什么？等你来看。#新华社向",
+      "src": "/media/xiangxin/xiangxin-02.mp4",
+      "poster": "/media/xiangxin/xiangxin-02.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 1489,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiangxin-03",
+      "title": "董宇辉广西出海被蚝排震惊！一片蚝排价值多少？养生蚝还能固碳？@董宇辉 直呼：“失敬了”！#新华社向新而行 #向新而行广西篇 #董宇辉 #媒体精选计划",
+      "src": "/media/xiangxin/xiangxin-03.mp4",
+      "poster": "/media/xiangxin/xiangxin-03.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 92,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiangxin-04",
+      "title": "董宇辉在广西实现百香果自由？ 跟@董宇辉 一起学，如何3招分辨百香果熟度！#新华社向新而行 #向新而行广西篇 #董宇辉广西实现百香果自由",
+      "src": "/media/xiangxin/xiangxin-04.mp4",
+      "poster": "/media/xiangxin/xiangxin-04.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 43,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiangxin-05",
+      "title": "后厨小董上线！ 榴莲炖鸡你吃过吗？@董宇辉 广西行跟玉林厨师学新菜。#新华社向新而行 #向新而行广西篇 #董宇辉广西学做榴莲鸡 #媒体精选计划",
+      "src": "/media/xiangxin/xiangxin-05.mp4",
+      "poster": "/media/xiangxin/xiangxin-05.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 66,
+      "orientation": "landscape"
+    }
+  ],
+  "tibet": [
+    {
+      "id": "tibet-01",
+      "title": "今天的西藏，会如何超出你的想象？新华社记者@大家好我是张扬 走进雪域高原的“平凡一天”。这里既有延续千年的文化印记，也有不断展开的新生活。如果你准备去西藏，不如先来看看这里",
+      "src": "/media/tibet/tibet-01.mp4",
+      "poster": "/media/tibet/tibet-01.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 4526,
+      "orientation": "landscape"
+    }
+  ],
+  "xinhua": [
+    {
+      "id": "xinhua-01",
+      "title": "#我的阅兵记忆 九三阅兵结束了，你印象最深刻的是什么呢？是最新亮相的武器装备、震撼人心的受阅方队，还是无数张让人动容的面孔？我们通过这样一场集体的盛典和仪式，来纪念80年前的",
+      "src": "/media/xinhua/xinhua-01.mp4",
+      "poster": "/media/xinhua/xinhua-01.jpg",
+      "width": 1280,
+      "height": 720,
+      "duration": 354,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xinhua-02",
+      "title": "由著名文化学者、作家易中天担任编剧并监制的国产动画电影《三国的星空第一部》于10月1日全国上映。这是78岁的易中天首次跨界打造动画电影，他希望能够带着观众回到那个热血沸腾、荡气",
+      "src": "/media/xinhua/xinhua-02.mp4",
+      "poster": "/media/xinhua/xinhua-02.jpg",
+      "width": 1280,
+      "height": 720,
+      "duration": 900,
+      "orientation": "landscape"
+    }
+  ],
+  "commercial": [
+    {
+      "id": "xiaomi-01",
+      "title": "雷总带你划重点之：安卓机皇和安卓之光",
+      "src": "/media/xiaomi/xiaomi-01.mp4",
+      "poster": "/media/xiaomi/xiaomi-01.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 124,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiaomi-02",
+      "title": "雷总带你划重点之：小米11 Ultra巅峰影像",
+      "src": "/media/xiaomi/xiaomi-02.mp4",
+      "poster": "/media/xiaomi/xiaomi-02.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 129,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiaomi-03",
+      "title": "雷总带你划重点之：小米11Pro影像巅峰",
+      "src": "/media/xiaomi/xiaomi-03.mp4",
+      "poster": "/media/xiaomi/xiaomi-03.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 142,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiaomi-04",
+      "title": "三分钟带你回顾小米春季新品发布会",
+      "src": "/media/xiaomi/xiaomi-04.mp4",
+      "poster": "/media/xiaomi/xiaomi-04.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 179,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiaomi-05",
+      "title": "小米11 求真大挑战之超级视频夜景篇",
+      "src": "/media/xiaomi/xiaomi-05.mp4",
+      "poster": "/media/xiaomi/xiaomi-05.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 169,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiaomi-06",
+      "title": "小米11求真大挑战之屏幕抗摔测试篇",
+      "src": "/media/xiaomi/xiaomi-06.mp4",
+      "poster": "/media/xiaomi/xiaomi-06.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 115,
+      "orientation": "landscape"
+    },
+    {
+      "id": "xiaomi-07",
+      "title": "小米11求真大挑战之心率测试篇",
+      "src": "/media/xiaomi/xiaomi-07.mp4",
+      "poster": "/media/xiaomi/xiaomi-07.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 191,
+      "orientation": "landscape"
+    }
+  ],
+  "student": [
+    {
+      "id": "course-01",
+      "title": "反家暴公益广告-残妆（职位：分镜+拍摄+剪辑）",
+      "src": "/media/course/course-01.mp4",
+      "poster": "/media/course/course-01.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 93,
+      "orientation": "landscape"
+    },
+    {
+      "id": "course-02",
+      "title": "纪录片《扬声》推介片",
+      "src": "/media/course/course-02.mp4",
+      "poster": "/media/course/course-02.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 60,
+      "orientation": "landscape"
+    },
+    {
+      "id": "course-03",
+      "title": "纪录片研究课程作业-先开枪再瞄准（职位：剪辑+拍摄）",
+      "src": "/media/course/course-03.mp4",
+      "poster": "/media/course/course-03.jpg",
+      "width": 1280,
+      "height": 720,
+      "duration": 1094,
+      "orientation": "landscape"
+    },
+    {
+      "id": "course-04",
+      "title": "中国口述历史国际周入围作品-郝姐 上京赶集（职位：剪辑）",
+      "src": "/media/course/course-04.mp4",
+      "poster": "/media/course/course-04.jpg",
+      "width": 1280,
+      "height": 720,
+      "duration": 1276,
+      "orientation": "landscape"
+    },
+    {
+      "id": "course-05",
+      "title": "自制谈话综艺-平行线-爱人再见（职位：编导+导播+剪辑）",
+      "src": "/media/course/course-05.mp4",
+      "poster": "/media/course/course-05.jpg",
+      "width": 1280,
+      "height": 720,
+      "duration": 523,
+      "orientation": "landscape"
+    }
+  ]
+}
