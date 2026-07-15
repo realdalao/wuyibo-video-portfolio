@@ -520,6 +520,12 @@ footer,
   cursor: pointer;
 }
 
+/* Keep the media card clean when it receives keyboard focus. */
+.video-tile:focus-visible {
+  outline: none;
+  outline-offset: 0;
+}
+
 .video-tile video {
   display: block;
   width: 100%;
