@@ -2,14 +2,14 @@
 // browser bundle. Entries without a Feishu token continue to use the R2
 // fallback configured in public/media/manifest.json.
 export const FEISHU_VIDEO_SOURCES = {
-  "ai-manga-01": { kind: "media", token: "DmaObePvuoC9k0xU2YJczj7EnCd" },
-  "ai-manga-02": { kind: "media", token: "PeZ3bhWB5o7pbMx3P9ccsceQnqe" },
-  "ai-manga-03": { kind: "media", token: "AsUub0BnUolgqvxKv1ncDHKAnue" },
-  "ai-manga-04": { kind: "media", token: "Fs0cbbREeolSoqxkPB5cwZeUnYd" },
-  "ai-manga-05": { kind: "media", token: "JJbIb7oQXoxD9JxLWzUcdvoBnLc" },
-  "ai-manga-06": { kind: "media", token: "QZzubcLt7o1OsMxmNFOcfRM2nph" },
-  "ai-manga-07": { kind: "media", token: "MUlubTh2QoN5OJxxwKIcIkpznYe" },
-  "ai-manga-08": { kind: "media", token: "CbyGbAEIHokXR4xW0LEcWM6dnac" },
+  "ai-manga-01": { kind: "media", token: "PeZ3bhWB5o7pbMx3P9ccsceQnqe" },
+  "ai-manga-02": { kind: "media", token: "Fs0cbbREeolSoqxkPB5cwZeUnYd" },
+  "ai-manga-03": { kind: "media", token: "QZzubcLt7o1OsMxmNFOcfRM2nph" },
+  "ai-manga-04": { kind: "media", token: "DmaObePvuoC9k0xU2YJczj7EnCd" },
+  "ai-manga-05": { kind: "media", token: "MUlubTh2QoN5OJxxwKIcIkpznYe" },
+  "ai-manga-06": { kind: "media", token: "P4Esb3D5koVLCqxm3lfcsed0nMc" },
+  "ai-manga-07": { kind: "media", token: "CbyGbAEIHokXR4xW0LEcWM6dnac" },
+  "ai-manga-08": { kind: "media", token: "AsUub0BnUolgqvxKv1ncDHKAnue" },
   "documentary-trailers-01": { kind: "media", token: "Nq6Rbo4UfoPGJSxvuGHcHn1nnGb" },
   "documentary-trailers-02": { kind: "media", token: "DeSEbwHYJo4afvxMvodcV26cnld" },
   "documentary-trailers-03": { kind: "media", token: "SL2tb3ZJXovPcPxw19HcOCvnnEh" },
