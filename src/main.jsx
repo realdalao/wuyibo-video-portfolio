@@ -503,7 +503,7 @@ function VideoModal({ viewer, onClose, onChange }) {
   const { videos, index, collectionTitle } = viewer;
   const video = videos[index];
   const details = getVideoDetails(video);
-  const playbackSources = [`/api/video/${video.id}`, video.src, `/previews/${video.id}.mp4`];
+  const playbackSources = [`/api/video/${video.id}?mapping=2`, video.src, `/previews/${video.id}.mp4`];
   const playbackSrc = playbackSources[sourceIndex];
 
   useEffect(() => {

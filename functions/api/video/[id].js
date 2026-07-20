@@ -48,6 +48,7 @@ function copyResponseHeaders(upstream) {
     const value = upstream.headers.get(name);
     if (value) headers.set(name, value);
   }
+  headers.set("cache-control", "no-store");
   headers.set("accept-ranges", "bytes");
   headers.set("x-content-type-options", "nosniff");
   return headers;
