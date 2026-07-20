@@ -23,7 +23,8 @@ const highlights = [
   { label: "纪录片学院奖片花", href: "#academy", copy: "纪录片片花剪辑" },
   { label: "新华社", href: "#xinhua", copy: "长纪录片与主题短视频" },
   { label: "央视频", href: "#yangshipin", copy: "风物短片策划与剪辑" },
-  { label: "小米宣传片", href: "#xiaomi", copy: "产品传播内容剪辑" }
+  { label: "小米宣传片", href: "#xiaomi", copy: "产品传播内容剪辑" },
+  { label: "课程作业与纪录片", href: "#student", copy: "校园创作与独立纪录片" }
 ];
 
 const works = [
@@ -131,6 +132,7 @@ const works = [
   {
     id: "student",
     category: "student",
+    videoIds: ["course-01", "course-05", "course-04", "course-03"],
     title: "课程作业与纪录片",
     role: "编导 / 拍摄 / 剪辑",
     client: "中国传媒大学",
@@ -451,7 +453,8 @@ const Works = memo(function Works({ manifest, onOpen }) {
       { title: "短视频", durationRule: "short", ids: ["yangsheng-xinhua", "xinhua-more", "xinhua-animation", "xinhua", "xiangxin", "tibet"] }
     ] },
     { id: "yangshipin", title: "央视频", kicker: "04 / 风物与品牌影像", ids: ["guangxi"] },
-    { id: "xiaomi", title: "小米宣传片", kicker: "05 / 产品传播内容", ids: ["commercial"] }
+    { id: "xiaomi", title: "小米宣传片", kicker: "05 / 产品传播内容", ids: ["commercial"] },
+    { id: "student", title: "课程作业与纪录片", kicker: "06 / 校园创作与独立纪录片", ids: ["student"] }
   ];
 
   const getWorkVideos = (id, durationRule) => {
