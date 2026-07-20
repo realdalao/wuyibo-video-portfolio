@@ -499,15 +499,16 @@ const Works = memo(function Works({ manifest, onOpen }) {
 function VideoModal({ viewer, onClose, onChange }) {
   const closeButtonRef = useRef(null);
   const [failed, setFailed] = useState(false);
-  const [usingPreview, setUsingPreview] = useState(false);
+  const [sourceIndex, setSourceIndex] = useState(0);
   const { videos, index, collectionTitle } = viewer;
   const video = videos[index];
   const details = getVideoDetails(video);
-  const playbackSrc = usingPreview ? `/previews/${video.id}.mp4` : video.src;
+  const playbackSources = [`/api/video/${video.id}`, video.src, `/previews/${video.id}.mp4`];
+  const playbackSrc = playbackSources[sourceIndex];
 
   useEffect(() => {
     setFailed(false);
-    setUsingPreview(false);
+    setSourceIndex(0);
   }, [video.id]);
 
   useEffect(() => {
@@ -556,7 +557,13 @@ function VideoModal({ viewer, onClose, onChange }) {
               autoPlay
               playsInline
               preload="metadata"
-              onError={() => usingPreview ? setFailed(true) : setUsingPreview(true)}
+              onError={() => {
+                if (sourceIndex < playbackSources.length - 1) {
+                  setSourceIndex(sourceIndex + 1);
+                } else {
+                  setFailed(true);
+                }
+              }}
             />
           )}
         </div>
