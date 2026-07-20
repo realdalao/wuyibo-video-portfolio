@@ -330,7 +330,7 @@ function Stats() {
     <section className="stats-section">
       <div className="stats-lead"><h2>视频不只是画面的流动，更是思想与 AI 碰撞的艺术。</h2></div>
       <p className="stats-note">从真实世界的现场，到生成式影像的实验，我关心内容如何被看见，也关心它如何被更高效地生产。</p>
-      <div className="stats-grid"><div><strong>41</strong><span>本地视频作品</span></div><div><strong>5</strong><span>核心创作方向</span></div><div><strong>1000W+</strong><span>全网播放量</span></div></div>
+      <div className="stats-grid"><div><strong>41</strong><span>本站视频作品</span></div><div><strong>5</strong><span>核心创作方向</span></div><div><strong>1000W+</strong><span>全网播放量</span></div></div>
     </section>
   );
 }
