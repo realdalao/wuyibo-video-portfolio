@@ -2,6 +2,8 @@ import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   ExternalLink,
   Grid2X2,
   Play,
@@ -546,26 +548,28 @@ function VideoModal({ viewer, onClose, onChange }) {
     <div className="video-modal" role="dialog" aria-modal="true" aria-labelledby="video-modal-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <div className={`modal-shell ${video.orientation}`}>
         <div className={`player-stage ${video.orientation}`}>
-          {failed ? (
-            <div className="player-error"><Play size={30} /><strong>暂时无法播放此视频</strong><span>请检查本地素材文件是否完整。</span></div>
-          ) : (
-            <video
-              key={playbackSrc}
-              src={playbackSrc}
-              poster={video.poster}
-              controls
-              autoPlay
-              playsInline
-              preload="metadata"
-              onError={() => {
-                if (sourceIndex < playbackSources.length - 1) {
-                  setSourceIndex(sourceIndex + 1);
-                } else {
-                  setFailed(true);
-                }
-              }}
-            />
-          )}
+          <div className="video-frame">
+            {failed ? (
+              <div className="player-error"><Play size={30} /><strong>暂时无法播放此视频</strong><span>请检查本地素材文件是否完整。</span></div>
+            ) : (
+              <video
+                key={playbackSrc}
+                src={playbackSrc}
+                poster={video.poster}
+                controls
+                autoPlay
+                playsInline
+                preload="metadata"
+                onError={() => {
+                  if (sourceIndex < playbackSources.length - 1) {
+                    setSourceIndex(sourceIndex + 1);
+                  } else {
+                    setFailed(true);
+                  }
+                }}
+              />
+            )}
+          </div>
         </div>
         <aside className="modal-info">
           <button className="modal-close" ref={closeButtonRef} type="button" onClick={onClose} aria-label="关闭播放器"><X size={22} /></button>
@@ -588,6 +592,10 @@ function VideoModal({ viewer, onClose, onChange }) {
                 ))}
               </div>
             )}
+          </div>
+          <div className="modal-nav" aria-label="切换作品">
+            <button type="button" onClick={() => onChange((index - 1 + videos.length) % videos.length)} aria-label="上一个作品"><ChevronLeft size={18} /></button>
+            <button type="button" onClick={() => onChange((index + 1) % videos.length)} aria-label="下一个作品"><ChevronRight size={18} /></button>
           </div>
         </aside>
       </div>
@@ -642,7 +650,7 @@ function Footer() {
     <footer className="editor-footer" id="contact">
       <div className="footer-main">
         <div className="footer-brand">
-          <a href="#top" className="footer-logo" aria-label="返回顶部"><span>W.</span> 吴义博</a>
+          <a href="#top" className="footer-logo" aria-label="返回顶部"><span>W</span> 吴义博</a>
           <p>视频创作者与 AIGC 内容制作者，覆盖策划、拍摄、剪辑及从创意到交付的完整制作流程。</p>
         </div>
 

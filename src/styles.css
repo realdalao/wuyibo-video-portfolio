@@ -1,7 +1,7 @@
 :root {
   color: #111;
   background: #fff;
-  font-family: "ABC Normal", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
   font-synthesis: none;
   text-rendering: geometricPrecision;
   --page-pad: clamp(16px, 2vw, 28px);
@@ -653,15 +653,10 @@ footer,
   padding: 28px max(24px, calc((100vw - 1440px) / 2));
   border: 0;
   background: transparent;
-  transition: background-color 280ms ease;
 }
 
 .editor-experience .experience-list article + article {
   border-top: 1px solid #dedfe1;
-}
-
-.editor-experience .experience-list article:hover {
-  background: #e9e9e9;
 }
 
 .experience-copy h3 {
@@ -1033,6 +1028,116 @@ footer,
   }
 }
 
+/* Final type system: one calm hierarchy for Chinese, English, numbers and UI. */
+:root {
+  --type-display: "DIN Next", "DIN Next LT Pro", "Source Han Sans SC", "Noto Sans SC", sans-serif;
+  --type-reading: "Source Han Sans SC", "Noto Sans SC", "DIN Next", Arial, sans-serif;
+}
+
+body,
+button,
+input,
+textarea,
+select {
+  font-family: var(--type-reading) !important;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+/* Keep Latin labels and figures crisp, light and consistently aligned. */
+.site-header,
+.header-actions,
+.category-tabs,
+.experience-pill,
+.stats-grid strong,
+.experience-time,
+.modal-kicker,
+.modal-field,
+.modal-nav,
+.footer-contact-grid strong,
+.footer-lower,
+.video-caption small,
+.grid-work-head .meta {
+  font-family: var(--type-display) !important;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.editor-hero .hero-intro h1,
+.chapter-intro h2,
+.experience-intro h2,
+.category-heading h3,
+.grid-work-head h3,
+.experience-copy h3,
+.modal-title {
+  text-wrap: balance;
+}
+
+.editor-hero .hero-intro h1 {
+  line-height: 1.02 !important;
+  text-wrap: pretty;
+}
+
+.chapter-intro h2,
+.experience-intro h2 {
+  font-size: clamp(36px, 4.2vw, 68px) !important;
+  line-height: 1.12 !important;
+  letter-spacing: 0.012em !important;
+}
+
+.category-heading h3,
+.grid-work-head h3 {
+  line-height: 1.28 !important;
+  letter-spacing: 0.006em !important;
+}
+
+.stats-grid strong,
+.experience-time {
+  letter-spacing: 0.015em !important;
+  line-height: 1 !important;
+}
+
+.hero-summary,
+.chapter-intro > p:last-child,
+.experience-copy p,
+.modal-description,
+.footer-brand p {
+  letter-spacing: 0.018em !important;
+  line-height: 1.72 !important;
+}
+
+.site-header a,
+.header-actions .dark-button,
+.category-tabs a,
+.modal-kicker,
+.modal-field,
+.video-caption small,
+.footer-contact-grid strong,
+.footer-lower {
+  line-height: 1.35 !important;
+}
+
+@media (max-width: 640px) {
+  .editor-hero .hero-intro h1 {
+    line-height: 1.06 !important;
+    letter-spacing: 0.025em !important;
+  }
+
+  .chapter-intro h2,
+  .experience-intro h2 {
+    font-size: clamp(32px, 10vw, 46px) !important;
+    line-height: 1.2 !important;
+  }
+
+  .hero-summary,
+  .chapter-intro > p:last-child,
+  .experience-copy p,
+  .modal-description,
+  .footer-brand p {
+    letter-spacing: 0.012em !important;
+    line-height: 1.68 !important;
+  }
+}
+
 /* Final hero spacing override. */
 @media (min-width: 1024px) {
   .editor-hero {
@@ -1173,7 +1278,7 @@ footer,
 
 @media (min-width: 1024px) {
   .editor-hero .hero-intro h1 {
-    font-family: "Helvetica Neue", "Arial Nova", Arial, sans-serif;
+    font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
     font-weight: 400 !important;
     letter-spacing: 0.015em !important;
   }
@@ -3620,5 +3725,1115 @@ footer p {
   .editor-hero .hero-sidecopy {
     right: 0;
     text-align: right;
+  }
+}
+
+/* Final cinematic dark theme. This layer intentionally sits after the legacy
+   editorial passes so every breakpoint shares one semantic color system. */
+:root {
+  color-scheme: dark;
+  color: #f2f2f2;
+  background: #080808;
+  --ink: #f2f2f2;
+  --muted: #b8b8b8;
+  --line: rgba(255, 255, 255, 0.14);
+  --soft: #171717;
+  --off: #101010;
+  --surface: #101010;
+  --surface-hover: #171717;
+}
+
+html,
+body,
+#root {
+  background: #080808;
+}
+
+body {
+  color: var(--ink);
+}
+
+.site-header {
+  color: var(--ink);
+  border-bottom-color: var(--line);
+  background: rgba(8, 8, 8, 0.84);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.site-header nav a,
+.ghost-link {
+  color: #c8c8c8;
+  opacity: 1;
+}
+
+.site-header nav a:hover,
+.ghost-link:hover {
+  color: var(--ink);
+}
+
+.soft-button {
+  color: var(--ink);
+  background: var(--surface-hover);
+  transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.soft-button:hover {
+  background: #222;
+}
+
+.dark-button,
+.light-button {
+  color: #080808;
+  background: #f2f2f2;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.dark-button:hover,
+.light-button:hover {
+  background: #fff;
+}
+
+.soft-button:active,
+.dark-button:active,
+.light-button:active,
+.outline-button:active {
+  transform: translateY(1px);
+}
+
+button:focus-visible,
+a:focus-visible,
+video:focus-visible {
+  outline-color: #f2f2f2;
+}
+
+.editor-hero,
+.stats-section,
+.editor-works,
+.editor-experience,
+.chapter,
+.category-section,
+.expanded-gallery {
+  color: var(--ink);
+  background: #080808;
+}
+
+.hero-summary,
+.stats-note,
+.stats-grid span,
+.section-kicker,
+.chapter-intro > p:last-child,
+.grid-work-head .meta,
+.grid-work-head p:not(.meta),
+.category-section .video-caption small,
+.video-caption small,
+.editor-experience .experience-copy p,
+.editor-experience .experience-list time,
+.experience-list article > span {
+  color: var(--muted);
+}
+
+.editor-hero .hero-intro h1 {
+  color: var(--ink);
+}
+
+.editor-hero .hero-sidecopy .hero-summary {
+  color: var(--muted);
+}
+
+.experience-pill {
+  color: #c8c8c8;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.experience-intro h2 {
+  color: var(--ink);
+}
+
+.editor-experience .experience-list,
+.editor-experience .experience-list article,
+.editor-experience .experience-list article + article {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.portrait-frame,
+.media-frame,
+.work-cover,
+.video-tile,
+.grid-work-gallery .video-tile,
+.expanded-gallery .video-tile {
+  background: var(--surface);
+}
+
+.portrait-frame,
+.work-cover,
+.video-tile {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.media-frame:not(.hero-media)::after {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.category-tabs a {
+  color: var(--ink);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: transparent;
+  border-radius: 6px;
+}
+
+.category-tabs a:hover {
+  color: #080808;
+  border-color: #f2f2f2;
+  background: #f2f2f2;
+}
+
+.stats-note,
+.stats-grid span,
+.section-kicker,
+.chapter-intro > p:last-child,
+.grid-work-head .meta,
+.grid-work-head p:not(.meta),
+.category-section .video-caption small,
+.video-caption small,
+.editor-experience .experience-copy p,
+.editor-experience .experience-list time,
+.experience-list article > span,
+.hero-summary,
+.editor-experience .experience-intro > p {
+  color: #b8b8b8;
+}
+
+.footer-contact-grid span,
+.footer-contact-grid a,
+.footer-lower > span,
+.footer-lower a,
+.editor-footer .footer-brand p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.modal-info-label,
+.modal-info dt {
+  color: #b8b8b8;
+}
+
+.modal-info p,
+.modal-info dd {
+  color: #c8c8c8;
+}
+
+.stats-section,
+.chapter,
+.grid-work,
+.editor-experience,
+.experience-list,
+.experience-list article {
+  border-color: var(--line);
+}
+
+.video-caption strong,
+.grid-work-head h3,
+.grid-work-links a,
+.experience-copy h3,
+.category-heading h3,
+.subcategory h4 {
+  color: var(--ink);
+}
+
+.video-tile {
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.video-tile:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: var(--surface-hover);
+}
+
+.video-tile:hover img,
+.video-tile:hover video,
+.grid-work-gallery .video-tile:hover img,
+.grid-work-gallery .video-tile:hover video {
+  opacity: 0.82;
+}
+
+.gallery-empty {
+  color: var(--muted);
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+.video-modal {
+  background: rgba(0, 0, 0, 0.88);
+}
+
+.modal-shell {
+  border-color: var(--line);
+  background: #0d0d0d;
+}
+
+.modal-info {
+  color: #d6d6d6;
+  background: #171717;
+}
+
+.modal-close:hover,
+.modal-links a:hover {
+  color: #080808;
+  background: #f2f2f2;
+}
+
+@media (min-width: 721px) {
+  :root {
+    --muted: #b8b8b8;
+    --line: rgba(255, 255, 255, 0.14);
+    --soft: #171717;
+  }
+
+  .site-header {
+    border-bottom-color: var(--line);
+  }
+
+  .expanded-gallery .video-tile {
+    background: var(--surface);
+  }
+}
+
+@media (max-width: 720px) {
+  .site-header {
+    background: rgba(8, 8, 8, 0.92);
+  }
+
+  .modal-info {
+    color: #d6d6d6;
+    background: #171717;
+  }
+}
+
+/* Bold editorial type pass: keep the serif family while making every text
+   surface carry the same confident weight. */
+*,
+*::before,
+*::after {
+  font-weight: 700 !important;
+}
+
+.editor-hero .hero-intro h1,
+.editor-hero .hero-sidecopy .hero-summary {
+  font-weight: 700 !important;
+}
+
+/* Airier tracking pass across every text surface. */
+*,
+*::before,
+*::after {
+  letter-spacing: 0.02em !important;
+}
+
+/* More breathable text rhythm while keeping display headings composed. */
+body,
+body * {
+  line-height: 1.4 !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.15 !important;
+}
+
+/* Pure-black reference player: spacious media stage, quiet metadata rail. */
+.video-modal {
+  background: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(18px);
+}
+
+.modal-shell {
+  position: relative;
+  width: min(1180px, calc(100vw - 40px)) !important;
+  box-sizing: border-box;
+  padding: 20px !important;
+  gap: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: #000;
+  box-shadow: 0 32px 100px rgba(0, 0, 0, 0.72);
+}
+
+.modal-shell::after {
+  position: absolute;
+  inset: 20px;
+  z-index: 3;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+  content: "";
+}
+
+.modal-shell .player-stage {
+  background: #000;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+}
+
+.modal-info {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 72px 30px 24px;
+  color: #f2f2f2;
+  background: #000;
+}
+
+.modal-info-copy {
+  min-height: 0;
+}
+
+.modal-info-label,
+.modal-info dt {
+  color: #a8a8a8 !important;
+}
+
+.modal-info strong {
+  color: #f2f2f2 !important;
+}
+
+.modal-info p,
+.modal-info dd {
+  color: #c8c8c8 !important;
+}
+
+.modal-close {
+  top: 18px !important;
+  right: 18px !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  color: #d8d8d8 !important;
+}
+
+.modal-close:hover,
+.modal-close:focus-visible {
+  color: #fff !important;
+  background: #171717 !important;
+  outline: 1px solid rgba(255, 255, 255, 0.32);
+  outline-offset: 2px;
+}
+
+.modal-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 28px;
+}
+
+.modal-nav button {
+  display: grid;
+  width: 38px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  color: #e8e8e8;
+  background: #101010;
+  cursor: pointer;
+}
+
+.modal-nav button:hover,
+.modal-nav button:focus-visible {
+  color: #080808;
+  background: #f2f2f2;
+  outline: 2px solid rgba(255, 255, 255, 0.32);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .video-modal {
+    padding: 12px;
+  }
+
+  .modal-shell,
+  .modal-shell.portrait,
+  .modal-shell.landscape {
+    display: flex;
+    width: min(100%, 560px) !important;
+    max-height: calc(100dvh - 24px);
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 12px !important;
+    gap: 12px;
+  }
+
+  .modal-shell::after {
+    inset: 12px;
+  }
+
+  .modal-shell .player-stage,
+  .modal-shell.landscape .player-stage,
+  .modal-shell.portrait .player-stage {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .modal-shell.portrait .player-stage {
+    aspect-ratio: 9 / 12;
+  }
+
+  .modal-info {
+    min-height: 220px;
+    overflow: auto;
+    padding: 28px 22px 18px;
+  }
+
+  .modal-close {
+    top: auto !important;
+    right: 12px !important;
+    bottom: auto !important;
+    z-index: 2;
+  }
+
+  .modal-nav {
+    padding-top: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-modal {
+    animation: none;
+  }
+}
+
+/* Gallery player: near-black canvas, generous pale media inset, restrained chrome. */
+.video-modal {
+  padding: 28px;
+  background: rgba(7, 7, 7, 0.96);
+  backdrop-filter: blur(14px);
+}
+
+.modal-shell,
+.modal-shell.portrait,
+.modal-shell.landscape {
+  width: min(1600px, calc(100vw - 120px)) !important;
+  height: min(900px, calc(100dvh - 100px));
+  max-height: calc(100dvh - 100px);
+  padding: 0 !important;
+  gap: 0;
+  border: 1px solid #222;
+  border-radius: 8px;
+  background: #0a0a0a;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.modal-shell::after {
+  display: none;
+}
+
+.modal-shell .player-stage,
+.modal-shell.landscape .player-stage,
+.modal-shell.portrait .player-stage {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  margin: 0;
+  padding: clamp(32px, 3vw, 40px);
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  box-sizing: border-box;
+}
+
+.modal-shell .player-stage video {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  background: #000;
+  object-fit: contain;
+  animation: modal-video-in 260ms ease both;
+}
+
+/* The frame owns the landscape canvas; the video keeps its own native ratio. */
+.video-frame {
+  display: flex;
+  width: 100%;
+  max-height: 100%;
+  aspect-ratio: 16 / 9;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-frame video {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.video-frame .player-error {
+  width: 100%;
+  height: 100%;
+}
+
+.modal-info {
+  min-height: 0;
+  overflow: hidden;
+  padding: 52px 46px 112px;
+  background: #0a0a0a;
+}
+
+.modal-info-copy {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-right: 4px;
+  gap: 24px;
+}
+
+.modal-info-label,
+.modal-info dt {
+  color: #9d9d9d !important;
+  font-size: 11px;
+  letter-spacing: 0.08em !important;
+}
+
+.modal-info strong {
+  color: #f2f2f2 !important;
+  font-size: clamp(28px, 2vw, 32px);
+  font-weight: 400 !important;
+  line-height: 1.16 !important;
+}
+
+.modal-info p,
+.modal-info dd {
+  color: #c5c5c5 !important;
+  font-size: 13px;
+  line-height: 1.55 !important;
+}
+
+.modal-close {
+  top: 20px !important;
+  right: 20px !important;
+  width: 30px !important;
+  height: 30px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: #c7c7c7 !important;
+}
+
+.modal-close:hover,
+.modal-close:focus-visible {
+  color: #fff !important;
+  background: transparent !important;
+  outline: none;
+}
+
+.modal-nav {
+  position: absolute;
+  right: 40px;
+  bottom: 40px;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding-top: 30px;
+}
+
+.modal-nav button {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  background: #1c1c1c;
+}
+
+.modal-nav button:hover,
+.modal-nav button:focus-visible {
+  color: #fff;
+  background: #2a2a2a;
+  outline: none;
+}
+
+@media (min-width: 721px) {
+  .modal-shell,
+  .modal-shell.landscape,
+  .modal-shell.portrait {
+    grid-template-columns: minmax(0, 65fr) minmax(320px, 35fr);
+    grid-template-rows: 1fr;
+  }
+
+  .modal-shell .player-stage {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .modal-shell .modal-info {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .video-modal {
+    padding: 14px;
+  }
+
+  .modal-shell,
+  .modal-shell.portrait,
+  .modal-shell.landscape {
+    width: min(100%, 620px) !important;
+    max-height: calc(100dvh - 28px);
+    height: auto;
+    padding: 0 !important;
+    gap: 0;
+  }
+
+  .modal-shell .player-stage,
+  .modal-shell.landscape .player-stage,
+  .modal-shell.portrait .player-stage {
+    height: min(56vh, 520px);
+    min-height: 220px;
+    aspect-ratio: auto !important;
+    padding: 18px;
+  }
+
+  .video-frame {
+    aspect-ratio: 16 / 10;
+  }
+
+  .modal-shell.portrait .player-stage {
+    height: min(68vh, 620px);
+    max-height: 70vh;
+    aspect-ratio: auto !important;
+  }
+
+  .modal-info {
+    min-height: 230px;
+    padding: 34px 22px 92px;
+  }
+
+  .modal-close {
+    top: 12px !important;
+    right: 12px !important;
+  }
+
+  .modal-nav {
+    right: 22px;
+    bottom: 20px;
+  }
+}
+
+/* Gallery geometry: a wide card owns the composition; the media stage fills its panel. */
+@media (min-width: 721px) {
+  .modal-shell,
+  .modal-shell.portrait,
+  .modal-shell.landscape {
+    width: min(1760px, calc(100vw - 48px), calc((100dvh - 48px) * 2.4)) !important;
+    height: auto;
+    max-height: none;
+    aspect-ratio: 2.4 / 1;
+    grid-template-columns: minmax(0, 66fr) minmax(320px, 34fr);
+    grid-template-rows: minmax(0, 1fr);
+    background: #101010;
+    border-color: #242424;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+  }
+
+  .modal-shell .player-stage,
+  .modal-shell.landscape .player-stage,
+  .modal-shell.portrait .player-stage {
+    width: 100%;
+    height: 100%;
+    padding: 0 32px;
+    background: #101010;
+  }
+
+  .modal-shell .video-frame {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    aspect-ratio: auto;
+    background: transparent;
+  }
+
+  .modal-shell .modal-info {
+    background: #101010;
+  }
+
+  .modal-shell.portrait {
+    width: min(860px, calc(100vw - 48px), calc(85dvh * 1.15)) !important;
+    aspect-ratio: 1.15 / 1;
+    grid-template-columns: 506px minmax(260px, 1fr);
+  }
+
+  .modal-shell.portrait .video-frame {
+    width: auto;
+    height: 100%;
+    aspect-ratio: 9 / 16;
+    background: #000;
+  }
+
+  .modal-shell.portrait .video-frame video {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .modal-shell.portrait .player-stage {
+    justify-content: center;
+    padding: 32px;
+  }
+
+  .modal-shell.portrait .modal-info {
+    padding: 32px 32px 96px;
+  }
+
+  .modal-shell.portrait .modal-nav {
+    right: 32px;
+    bottom: 32px;
+  }
+}
+
+@keyframes modal-video-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+button,
+input,
+textarea,
+select,
+.experience-pill,
+.category-tabs a,
+.soft-button,
+.dark-button,
+.light-button,
+.outline-button {
+  line-height: 1.2 !important;
+}
+
+/* Video-card hover treatment inspired by the supplied reference recording:
+   soften the moving image and reveal a centered action cue. */
+.category-section .video-tile img,
+.category-section .video-tile video {
+  transition: filter 280ms ease, opacity 280ms ease, transform 420ms ease;
+}
+
+.category-section .video-tile:hover img,
+.category-section .video-tile:hover video,
+.category-section .video-tile:focus-visible img,
+.category-section .video-tile:focus-visible video {
+  filter: blur(4px) brightness(0.72);
+  opacity: 0.92;
+  transform: scale(1.045);
+}
+
+.category-section .video-tile .tile-shade {
+  display: block !important;
+  background: rgba(0, 0, 0, 0.16);
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.category-section .video-tile:hover .tile-shade,
+.category-section .video-tile:focus-visible .tile-shade {
+  opacity: 1;
+}
+
+.category-section .video-tile .tile-play {
+  top: 50%;
+  right: auto;
+  left: 50%;
+  display: inline-flex !important;
+  width: auto;
+  height: auto;
+  padding: 9px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  color: #fff;
+  background: rgba(8, 8, 8, 0.58);
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.9);
+  transition: opacity 280ms ease, transform 420ms ease, background 180ms ease;
+}
+
+.category-section .video-tile .tile-play svg {
+  display: none;
+}
+
+.category-section .video-tile .tile-play::after {
+  content: "观看全片";
+}
+
+.category-section .video-tile:hover .tile-play,
+.category-section .video-tile:focus-visible .tile-play {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-section .video-tile img,
+  .category-section .video-tile video,
+  .category-section .video-tile .tile-shade,
+  .category-section .video-tile .tile-play {
+    transition: none;
+  }
+}
+
+/* Global typography: Google Sans first, with robust sans-serif fallbacks. */
+html,
+body,
+button,
+input,
+textarea,
+select,
+body * {
+  font-family: "DIN Next", "DIN Next LT Pro", "Source Han Sans SC", "Noto Sans SC", Arial, sans-serif !important;
+}
+
+/* Gallery media is edge-to-edge: no visible outer keyline around any video. */
+.video-tile,
+.grid-work-gallery .video-tile,
+.expanded-gallery .video-tile,
+.video-tile:hover,
+.grid-work-gallery .video-tile:hover,
+.expanded-gallery .video-tile:hover {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Typography refinement: restore hierarchy, readable rhythm, and safe fluid scaling. */
+html,
+body,
+#root {
+  overflow-x: hidden;
+}
+
+body,
+body * {
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1.55 !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+.brand,
+.video-caption strong,
+.grid-work-head h3,
+.category-heading h3,
+.experience-copy h3,
+.stats-grid strong,
+.footer-logo {
+  font-weight: 700 !important;
+  letter-spacing: -0.015em !important;
+  line-height: 1.18 !important;
+}
+
+.site-header,
+.site-header nav,
+.header-actions,
+.category-tabs a,
+.video-caption small,
+.grid-work-head .meta,
+.experience-pill,
+.footer-contact-grid strong,
+.footer-lower {
+  letter-spacing: 0.035em !important;
+}
+
+.editor-hero .hero-intro h1 {
+  max-width: 9ch;
+  font-size: clamp(56px, 7.2vw, 112px) !important;
+  line-height: 0.96 !important;
+  letter-spacing: -0.045em !important;
+}
+
+.hero-summary,
+.stats-note,
+.chapter-intro > p:last-child,
+.editor-experience .experience-copy p,
+.editor-experience .experience-intro > p,
+.editor-footer .footer-brand p {
+  max-width: 58ch;
+  font-size: clamp(13px, 1.05vw, 15px) !important;
+  line-height: 1.7 !important;
+}
+
+.stats-grid strong {
+  font-size: clamp(42px, 4.4vw, 68px) !important;
+  line-height: 1 !important;
+}
+
+.category-heading h3,
+.grid-work-head h3,
+.experience-copy h3 {
+  font-size: clamp(22px, 2.1vw, 30px) !important;
+}
+
+.video-caption strong,
+.video-caption small,
+.grid-work-head .meta,
+.grid-work-head p {
+  line-height: 1.45 !important;
+}
+
+@media (max-width: 1023px) {
+  .editor-hero,
+  .stats-section,
+  .editor-works,
+  .editor-experience {
+    width: min(100% - 40px, 760px);
+  }
+
+  .editor-hero {
+    min-height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+    padding: 72px 0 64px;
+  }
+
+  .editor-hero .hero-intro h1 {
+    max-width: 8ch;
+    font-size: clamp(52px, 11vw, 88px) !important;
+  }
+
+  .editor-hero .hero-sidecopy {
+    max-width: 560px;
+  }
+
+  .stats-section {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding-block: 72px;
+  }
+}
+
+@media (max-width: 640px) {
+  body,
+  body * {
+    letter-spacing: 0.005em !important;
+  }
+
+  .site-header {
+    min-height: 56px;
+  }
+
+  .site-header nav {
+    gap: 14px;
+    font-size: 11px;
+  }
+
+  .editor-hero,
+  .stats-section,
+  .editor-works,
+  .editor-experience {
+    width: calc(100% - 32px);
+  }
+
+  .editor-hero {
+    padding: 52px 0 48px;
+  }
+
+  .editor-hero .hero-intro h1 {
+    font-size: clamp(46px, 14vw, 68px) !important;
+    letter-spacing: -0.04em !important;
+  }
+
+  .hero-summary,
+  .stats-note,
+  .chapter-intro > p:last-child,
+  .editor-experience .experience-copy p,
+  .editor-experience .experience-intro > p,
+  .editor-footer .footer-brand p {
+    font-size: 13px !important;
+    line-height: 1.65 !important;
+  }
+
+  .stats-grid strong {
+    font-size: clamp(38px, 12vw, 56px) !important;
+  }
+}
+
+/* Lighten the entire typographic system without changing its scale or rhythm. */
+body,
+body *,
+*::before,
+*::after {
+  font-weight: 200 !important;
+}
+
+/* Annotation pass: lighter display typography and tighter modal information rhythm. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.category-heading h3,
+.grid-work-head h3,
+.experience-copy h3,
+.stats-grid strong,
+.video-caption strong {
+  font-weight: 300 !important;
+}
+
+.editor-hero .hero-intro h1 {
+  font-size: clamp(68px, 8.6vw, 144px) !important;
+  font-weight: 200 !important;
+  letter-spacing: 0.04em !important;
+}
+
+.modal-info-copy {
+  align-content: start;
+  gap: 16px;
+}
+
+.header-actions .dark-button {
+  color: #f2f2f2 !important;
+  background: #4a4a4a !important;
+}
+
+.header-actions .dark-button:hover,
+.header-actions .dark-button:focus-visible {
+  color: #fff !important;
+  background: #616161 !important;
+}
+
+@media (min-width: 721px) {
+  .modal-shell.portrait .modal-nav {
+    position: absolute;
+    right: 32px;
+    bottom: 32px;
+    justify-content: flex-end;
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .modal-shell.portrait .modal-info-copy {
+    flex: 1 1 auto;
+    overflow: auto;
   }
 }

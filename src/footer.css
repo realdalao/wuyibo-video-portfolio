@@ -3,7 +3,7 @@
   margin: 0;
   padding: 0 max(24px, calc((100% - 1440px) / 2));
   color: #f2f2f2;
-  background: #111214;
+  background: #080808;
 }
 
 .footer-main {
@@ -35,8 +35,8 @@
   height: 42px;
   place-items: center;
   border-radius: 8px;
-  color: #111214;
-  background: #fff;
+  color: #080808;
+  background: #f2f2f2;
   font-size: 20px;
   font-weight: 600;
 }
@@ -44,7 +44,7 @@
 .editor-footer .footer-brand p {
   max-width: 390px;
   margin: 20px 0 0;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 15px;
   line-height: 1.5;
 }
@@ -96,7 +96,7 @@
 
 .footer-contact-grid span,
 .footer-contact-grid a {
-  color: rgba(255, 255, 255, 0.44);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 13px;
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -113,7 +113,7 @@
 
 .footer-lower > span,
 .footer-lower a {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
 }
 
