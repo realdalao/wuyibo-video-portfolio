@@ -44,7 +44,7 @@
 .editor-footer .footer-brand p {
   max-width: 390px;
   margin: 20px 0 0;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 15px;
   line-height: 1.5;
 }
@@ -96,7 +96,7 @@
 
 .footer-contact-grid span,
 .footer-contact-grid a {
-  color: rgba(255, 255, 255, 0.44);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 13px;
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -113,7 +113,7 @@
 
 .footer-lower > span,
 .footer-lower a {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
 }
 
