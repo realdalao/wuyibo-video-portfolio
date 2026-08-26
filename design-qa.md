@@ -1,9 +1,14 @@
 # Design QA
 
-source visual truth: `/Users/wuyibo/Pictures/百晓生.library/images/MRJZV9DF4EDZA.info/Runway  Building Real-World Intelligence for all industries and fronti.png`
-implementation screenshot: `/tmp/portfolio-category-rows-final-v2.png`
-viewport: 1440 x 1000, full-page desktop capture; secondary mobile check at 390 x 844
-state: default page, plus AI 漫剧 gallery open and first video playing
+source visual truth: `/tmp/runway-portfolio-before.png`
+implementation screenshot: `/tmp/runway-portfolio-dark-desktop.png`
+comparison image: `/tmp/runway-portfolio-dark-comparison.png`
+mobile implementation screenshot: `/tmp/runway-portfolio-dark-mobile.png`
+viewport: 1578 x 1242 desktop at deviceScaleFactor 1; secondary mobile check at 390 x 844
+source pixels: 1578 x 1242
+implementation pixels: 1578 x 1242
+normalization: identical desktop CSS viewport, pixel dimensions, density, route, and default state; no resampling
+state: default page, works gallery, and first video modal
 
 ## Comparison Evidence
 
@@ -14,7 +19,7 @@ state: default page, plus AI 漫剧 gallery open and first video playing
 
 - Typography: restrained system sans, regular display weights, small gray metadata labels, and compact Chinese copy match the reference's editorial hierarchy.
 - Spacing/layout: centered 980px content rail, generous vertical chapter gaps, hairline dividers, left narrative column and right media column are stable at desktop and mobile.
-- Colors/tokens: white page, black type, cool gray rules and muted black footer; no new accent hue was introduced.
+- Colors/tokens: `#080808` page, `#101010` surface, `#171717` hover surface, `#f2f2f2` primary type, `#989898` secondary type, and 14%-white rules; no accent hue was introduced.
 - Image fidelity: supplied portrait is used locally; 41 local MP4 poster frames remain the source of truth for the works. Representative posters are eager-loaded, gallery posters remain lazy-loaded.
 - Copy/content: Chinese navigation and recruitment-oriented copy reflect the confirmed target audience; no fabricated personal metrics were added beyond the supplied 41 works and 1亿元+ project experience.
 
@@ -57,7 +62,7 @@ No actionable P0, P1, or P2 findings remain. The reference is a static editorial
 
 - P3: some source videos may intentionally begin with a title card or dark frame; posters now use the exact first frame as requested.
 
-final result: passed
+historical final result: passed
 
 ## Pass 29: Hero reference layout
 - Desktop hero now uses the reference composition: oversized two-line identity title at lower left, compact rounded portrait at upper right, and concise intro/CTA at lower right.
@@ -80,3 +85,37 @@ final result: passed
 - Pass 26: added concise display titles for all local videos. Gallery captions, accessible labels, and modal headers now use the same short names while source files and playback data remain unchanged.
 - Pass 27: redesigned the video preview as a reference-style split modal: video on the left, project information and close action on the right, with the existing native controls and previous/next footer retained. Browser measurements confirm landscape stage 785 x 442 (16:9) and portrait stage 559 x 993 (9:16).
 - Pass 28: removed the annotated small kicker labels from the hero, stats, works, category, and experience sections, and removed the overlapping hero location/year meta. Main headings and media remain unchanged.
+
+## Pass 31: Cinematic dark theme
+
+### Full-view comparison evidence
+
+- The combined before/after image at `/tmp/runway-portfolio-dark-comparison.png` confirms that navigation, hero geometry, portrait crop, copy wrapping, metric columns, and first-viewport spacing are unchanged while every white page surface is replaced by the intended neutral black system.
+- The works capture confirms that portrait and landscape media retain their original color, crop, ratio, and grid positions against the dark canvas.
+
+### Focused-region comparison evidence
+
+- Hero: the initial dark render exposed a P1 contrast regression from legacy desktop selectors (`#111216` title and `#17191e` side copy). The final theme now resolves the title to `rgb(242, 242, 242)` and supporting copy to `#989898`.
+- Works grid: category headings and captions resolve to `rgb(242, 242, 242)`; media cards use a subtle 10%-white edge without changing image dimensions.
+- Modal: the first ReelShort item opens in a split dark shell with the existing native video controls, project metadata, and close action.
+- Mobile: the 390 x 844 checks cover the top composition and ReelShort grid; `innerWidth` is 390 and document `scrollWidth` is 375, so no horizontal overflow is introduced.
+
+### Current findings
+
+No actionable P0, P1, or P2 findings remain.
+
+### Current interaction and technical checks
+
+- Header navigation, mail link, and View Works link remain present.
+- All 41 video buttons remain available in the DOM.
+- Opening “灯神救人” produces exactly one dialog; the close control dismisses it.
+- Desktop and mobile computed page backgrounds are `rgb(8, 8, 8)`.
+- Browser warnings/errors after reload: none.
+- `npm run build`: passed.
+- `git diff --check`: passed.
+
+### Follow-up polish
+
+- P3: the white primary button is intentionally the brightest non-media element to preserve a clear action hierarchy.
+
+final result: passed

@@ -20,6 +20,7 @@ function resolveMediaUrl(path) {
 
 const highlights = [
   { label: "ReelShort 短剧", href: "#reelshort", copy: "AIGC 短剧生产与交付" },
+  { label: "AIGC 知识视频", href: "#newtestament", copy: "AI 全素材生成与视觉叙事" },
   { label: "纪录片学院奖片花", href: "#academy", copy: "纪录片片花剪辑" },
   { label: "新华社", href: "#xinhua", copy: "长纪录片与主题短视频" },
   { label: "央视频", href: "#yangshipin", copy: "风物短片策划与剪辑" },
@@ -35,6 +36,15 @@ const works = [
     role: "AIGC 视频制作",
     client: "ReelShort",
     description: "熟练运用 AI 文生图、图生视频、AI 配音等生成工具，完成短剧内容制作、审核、返修和迭代输出。",
+    links: [{ label: "作品集来源", href: portfolioSource }]
+  },
+  {
+    id: "newtestament",
+    category: "newtestament",
+    title: "AIGC 知识视频",
+    role: "AI 全素材生成 · 视觉叙事 · 动态制作与剪辑",
+    client: "新约百晓生",
+    description: "根据甲方提供的配音旁白，独立完成视觉拆解、AI 素材生成、镜头设计、动态影像制作与后期剪辑，将文字叙述转化为完整、连贯的知识短视频。视频中的人物、场景与视觉素材均由 AI 生成。",
     links: [{ label: "作品集来源", href: portfolioSource }]
   },
   {
@@ -167,6 +177,9 @@ const displayTitleById = {
   "ai-manga-06": "日漫女孩",
   "ai-manga-07": "亚洲男孩武打片",
   "ai-manga-08": "忠诚四男",
+  "newtestament-01": "为什么罗马皇帝都叫“凯撒”？",
+  "newtestament-02": "十字架的由来",
+  "newtestament-03": "凯撒的归凯撒，上帝的归上帝",
   "documentary-trailers-01": "《窗外是蓝星》",
   "documentary-trailers-02": "《方舟·布氏鲸》",
   "documentary-trailers-03": "《河湟三章·河》",
@@ -203,6 +216,15 @@ const displayTitleById = {
 };
 
 const videoDetailsById = {
+  "newtestament-01": {
+    description: "从罗马皇帝的称谓出发，回到彼拉多与耶稣受难的历史语境。"
+  },
+  "newtestament-02": {
+    description: "追溯十字架如何从处刑刑具，成为基督教最具辨识度的象征。"
+  },
+  "newtestament-03": {
+    description: "重新理解“凯撒的归凯撒，上帝的归上帝”所处的时代与文本脉络。"
+  },
   "documentary-trailers-01": { award: "评委会大奖 & 最佳音乐音响奖" },
   "documentary-trailers-02": { award: "最佳短纪录片奖提名" },
   "documentary-trailers-03": { award: "最佳短纪录片奖" },
@@ -442,19 +464,26 @@ const Works = memo(function Works({ manifest, onOpen }) {
   const categories = [
     { id: "reelshort", title: "ReelShort 短剧", kicker: "01 / AIGC 视频制作", ids: ["ai"] },
     {
+      id: "newtestament",
+      title: "AIGC 知识视频",
+      kicker: "02 / AI 全素材生成与视觉叙事",
+      description: "根据甲方提供的配音旁白，独立完成视觉拆解、AI 素材生成、镜头设计、动态影像制作与后期剪辑，将文字叙述转化为完整、连贯的知识短视频。视频中的人物、场景与视觉素材均由 AI 生成。",
+      ids: ["newtestament"]
+    },
+    {
       id: "academy",
       title: "纪录片学院奖片花",
       heading: <>第十五届“光影纪年”<br />中国纪录片学院奖片花</>,
-      kicker: "02 / 纪录片片花",
+      kicker: "03 / 纪录片片花",
       ids: ["academy"]
     },
-    { id: "xinhua", title: "新华社", kicker: "03 / 纪实与主题影像", subgroups: [
+    { id: "xinhua", title: "新华社", kicker: "04 / 纪实与主题影像", subgroups: [
       { title: "长纪录片", durationRule: "long", ids: ["xinhua", "tibet", "xiangxin"] },
       { title: "短视频", durationRule: "short", ids: ["yangsheng-xinhua", "xinhua-more", "xinhua-animation", "xinhua", "xiangxin", "tibet"] }
     ] },
-    { id: "yangshipin", title: "央视频", kicker: "04 / 风物与品牌影像", ids: ["guangxi"] },
-    { id: "xiaomi", title: "小米宣传片", kicker: "05 / 产品传播内容", ids: ["commercial"] },
-    { id: "student", title: "课程作业与纪录片", kicker: "06 / 校园创作与独立纪录片", ids: ["student"] }
+    { id: "yangshipin", title: "央视频", kicker: "05 / 风物与品牌影像", ids: ["guangxi"] },
+    { id: "xiaomi", title: "小米宣传片", kicker: "06 / 产品传播内容", ids: ["commercial"] },
+    { id: "student", title: "课程作业与纪录片", kicker: "07 / 校园创作与独立纪录片", ids: ["student"] }
   ];
 
   const getWorkVideos = (id, durationRule) => {
@@ -486,7 +515,10 @@ const Works = memo(function Works({ manifest, onOpen }) {
       </nav>
       {categories.map((category) => (
         <section className="chapter category-section" id={category.id} key={category.id}>
-          <header className="category-heading"><h3>{category.heading || category.title}</h3></header>
+          <header className="category-heading">
+            <h3>{category.heading || category.title}</h3>
+            {category.description && <p>{category.description}</p>}
+          </header>
           <div className="category-content">
             {category.subgroups ? category.subgroups.map((group) => <section className="subcategory" key={group.title}><h4>{group.title}</h4><div className="subcategory-gallery">{renderGallery(group.ids, group.durationRule, group.title)}</div></section>) : <div className="category-gallery">{renderGallery(category.ids, undefined, category.title)}</div>}
           </div>

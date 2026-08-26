@@ -375,6 +375,38 @@
       "orientation": "landscape"
     }
   ],
+  "newtestament": [
+    {
+      "id": "newtestament-01",
+      "title": "为什么罗马皇帝都叫“凯撒”？｜真正判死耶稣的人是谁？",
+      "src": "/previews/newtestament-01.mp4",
+      "poster": "/media/newtestament/newtestament-01.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 282,
+      "orientation": "landscape"
+    },
+    {
+      "id": "newtestament-02",
+      "title": "十字架的由来",
+      "src": "/previews/newtestament-02.mp4",
+      "poster": "/media/newtestament/newtestament-02.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 247,
+      "orientation": "landscape"
+    },
+    {
+      "id": "newtestament-03",
+      "title": "凯撒的归凯撒，上帝的归上帝",
+      "src": "/previews/newtestament-03.mp4",
+      "poster": "/media/newtestament/newtestament-03.jpg",
+      "width": 1920,
+      "height": 1080,
+      "duration": 262,
+      "orientation": "landscape"
+    }
+  ],
   "student": [
     {
       "id": "course-01",
