@@ -2,9 +2,11 @@
 // browser bundle. Entries without a Feishu token continue to use the R2
 // fallback configured in public/media/manifest.json.
 export const FEISHU_VIDEO_SOURCES = {
+  "white-horse-wedding": { kind: "media", token: "RUzzbYJqQovMCuxInHSc70Wznqe" },
   "newtestament-01": { kind: "media", token: "UaIXbNPRuosJs8xLfjJcK8o1nec" },
   "newtestament-02": { kind: "media", token: "HI4Pb6am7ojSufxhd9Ic4eeunyc" },
   "newtestament-03": { kind: "media", token: "XWKHbrmrmoANpGxF2ybcMCmRn8e" },
+  "yiyan-nanjing": { kind: "media", token: "IxDIblvdjoSIFxx1B3Yc6Kfgnfh" },
   "ai-manga-01": { kind: "media", token: "PeZ3bhWB5o7pbMx3P9ccsceQnqe" },
   "ai-manga-02": { kind: "media", token: "Fs0cbbREeolSoqxkPB5cwZeUnYd" },
   "ai-manga-03": { kind: "media", token: "QZzubcLt7o1OsMxmNFOcfRM2nph" },

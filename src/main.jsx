@@ -4,22 +4,13 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
   Grid2X2,
-  Play,
-  X
 } from "lucide-react";
 import "./styles.css";
 import "./experience.css";
 import "./footer.css";
 
 const portfolioSource = "https://fcnapthanwru.feishu.cn/wiki/VNwkwSqvriUfmrklQQNc2mNanJE?from=from_copylink";
-const mediaBaseUrl = (import.meta.env.VITE_MEDIA_BASE_URL || "https://pub-c8843e00706b41c28fcaf1a5586b7161.r2.dev").replace(/\/$/, "");
-
-function resolveMediaUrl(path) {
-  return path?.startsWith("/") ? `${mediaBaseUrl}${path}` : path;
-}
-
 const highlights = [
   { label: "ReelShort 短剧", href: "#reelshort", copy: "AIGC 短剧生产与交付" },
   { label: "AIGC 知识视频", href: "#newtestament", copy: "AI 全素材生成与视觉叙事" },
@@ -171,6 +162,7 @@ function formatDuration(seconds) {
 }
 
 const displayTitleById = {
+  "white-horse-wedding": "白马婚礼",
   "ai-manga-01": "灯神救人",
   "ai-manga-02": "狼人女主",
   "ai-manga-03": "阿拉丁许愿",
@@ -182,6 +174,7 @@ const displayTitleById = {
   "newtestament-01": "为什么罗马皇帝都叫“凯撒”？",
   "newtestament-02": "十字架的由来",
   "newtestament-03": "凯撒的归凯撒，上帝的归上帝",
+  "yiyan-nanjing": "一言难靖预告片",
   "documentary-trailers-01": "《窗外是蓝星》",
   "documentary-trailers-02": "《方舟·布氏鲸》",
   "documentary-trailers-03": "《河湟三章·河》",
@@ -218,6 +211,9 @@ const displayTitleById = {
 };
 
 const videoDetailsById = {
+  "white-horse-wedding": {
+    description: "白马婚礼预告片。"
+  },
   "newtestament-01": {
     description: "从罗马皇帝的称谓出发，回到彼拉多与耶稣受难的历史语境。"
   },
@@ -226,6 +222,9 @@ const videoDetailsById = {
   },
   "newtestament-03": {
     description: "重新理解“凯撒的归凯撒，上帝的归上帝”所处的时代与文本脉络。"
+  },
+  "yiyan-nanjing": {
+    description: "一言难靖预告片。"
   },
   "documentary-trailers-01": { award: "评委会大奖 & 最佳音乐音响奖" },
   "documentary-trailers-02": { award: "最佳短纪录片奖提名" },
@@ -274,6 +273,8 @@ const videoDetailsById = {
   "xiaomi-07": { description: "期待已久的冰天雪地极速赛道心率监测来了，带你体验从初级到高级雪道的心跳加速。" }
 };
 
+const captionlessGalleryVideoIds = new Set(["palace-01", "palace-03", "palace-04", "palace-05"]);
+
 function getVideoDetails(video) {
   return videoDetailsById[video.id] || {};
 }
@@ -286,6 +287,32 @@ function getDisplayTitle(video) {
 // dozens of video decoders in a single frame.
 const previewPlayQueue = new Set();
 let previewPlayTimer = null;
+
+function PlayerGlyph({ name, size = 22 }) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2.35,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true
+  };
+
+  if (name === "play") return <svg {...common}><path d="M7.5 5.4c0-1.2 1.32-1.92 2.32-1.25l8.7 5.85a1.5 1.5 0 0 1 0 2.5l-8.7 5.85A1.5 1.5 0 0 1 7.5 17.1Z" fill="currentColor" stroke="none" /></svg>;
+  if (name === "pause") return <svg {...common}><rect x="6.2" y="4.3" width="4.1" height="15.4" rx="1.55" fill="currentColor" stroke="none" /><rect x="13.7" y="4.3" width="4.1" height="15.4" rx="1.55" fill="currentColor" stroke="none" /></svg>;
+  if (name === "forward") return <svg {...common}><path d="M4.3 6.6c0-1.12 1.25-1.8 2.2-1.18l7.24 4.72a1.41 1.41 0 0 1 0 2.36L6.5 17.22a1.41 1.41 0 0 1-2.2-1.18Z" fill="currentColor" stroke="none" /><path d="M11.2 6.6c0-1.12 1.25-1.8 2.2-1.18l6.1 3.98a2.28 2.28 0 0 1 0 3.84l-6.1 3.98a1.41 1.41 0 0 1-2.2-1.18Z" fill="currentColor" stroke="none" /></svg>;
+  if (name === "rewind") return <svg {...common}><path d="M19.7 6.6c0-1.12-1.25-1.8-2.2-1.18l-7.24 4.72a1.41 1.41 0 0 0 0 2.36l7.24 4.72a1.41 1.41 0 0 0 2.2-1.18Z" fill="currentColor" stroke="none" /><path d="M12.8 6.6c0-1.12-1.25-1.8-2.2-1.18L4.5 9.4a2.28 2.28 0 0 0 0 3.84l6.1 3.98a1.41 1.41 0 0 0 2.2-1.18Z" fill="currentColor" stroke="none" /></svg>;
+  if (name === "volume") return <svg {...common}><path d="M4.2 9.2v5.6h3.3l4.1 3.55V5.65L7.5 9.2Z" /><path d="M15.1 8.4a5.15 5.15 0 0 1 0 7.2" /><path d="M18 5.7a8.9 8.9 0 0 1 0 12.6" /></svg>;
+  if (name === "muted") return <svg {...common}><path d="M3.8 9.2v5.6h3.1l4 3.55V5.65l-4 3.55Z" /><path d="m15 9 5 5m0-5-5 5" /></svg>;
+  if (name === "fullscreen") return <svg {...common}><path d="M8.6 4.5H5.9a1.4 1.4 0 0 0-1.4 1.4v2.7M15.4 4.5h2.7a1.4 1.4 0 0 1 1.4 1.4v2.7M19.5 15.4v2.7a1.4 1.4 0 0 1-1.4 1.4h-2.7M8.6 19.5H5.9a1.4 1.4 0 0 1-1.4-1.4v-2.7" /></svg>;
+  if (name === "more") return <svg {...common}><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" /><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none" /></svg>;
+  if (name === "close") return <svg {...common}><path d="m6.5 6.5 11 11m0-11-11 11" /></svg>;
+  if (name === "external") return <svg {...common}><rect x="4.5" y="7.2" width="12.3" height="12.3" rx="3" /><path d="M12.2 4.5h7.3v7.3m0-7.3-8.7 8.7" /></svg>;
+  return null;
+}
 
 function schedulePreviewPlayback(video) {
   previewPlayQueue.add(video);
@@ -315,35 +342,81 @@ function schedulePreviewPlayback(video) {
 function Header() {
   return (
     <header className="site-header">
-      <a className="brand" href="#top" aria-label="返回顶部">吴义博</a>
-      <nav aria-label="主导航">
-        <a href="#works">作品</a>
-        <a href="#experience">经历</a>
-        <a href="#contact">联系</a>
-      </nav>
+      <a className="brand" href="#top" aria-label="返回顶部">吴义博作品集</a>
       <div className="header-actions">
-        <a className="soft-button" href="mailto:754087377@qq.com">Email</a>
+        <a className="soft-button" href="mailto:wu.yibo@foxmail.com">Email</a>
         <a className="dark-button" href="#works">View Works</a>
       </div>
     </header>
   );
 }
 
+function CrossfadeHeroVideo() {
+  const videoRefs = useRef([]);
+  const activeIndex = useRef(0);
+  const transitioning = useRef(false);
+  const [visibleIndex, setVisibleIndex] = useState(0);
+
+  const beginCrossfade = useCallback((index) => {
+    if (index !== activeIndex.current || transitioning.current) return;
+    const current = videoRefs.current[index];
+    // Start preparing slightly early, then only fade once a decoded frame is on screen.
+    if (!current?.duration || current.duration - current.currentTime > 1.25) return;
+
+    const nextIndex = index === 0 ? 1 : 0;
+    const next = videoRefs.current[nextIndex];
+    if (!next) return;
+    transitioning.current = true;
+    next.currentTime = 0;
+    const revealNextFrame = () => {
+      activeIndex.current = nextIndex;
+      setVisibleIndex(nextIndex);
+      window.setTimeout(() => {
+        current.pause();
+        current.currentTime = 0;
+        transitioning.current = false;
+      }, 1000);
+    };
+
+    next.play()
+      .then(() => {
+        if (typeof next.requestVideoFrameCallback === "function") {
+          next.requestVideoFrameCallback(revealNextFrame);
+        } else {
+          window.requestAnimationFrame(() => window.requestAnimationFrame(revealNextFrame));
+        }
+      })
+      .catch(() => { transitioning.current = false; });
+  }, []);
+
+  return (
+    <div className="hero-video-crossfade" aria-label="玻璃鱼缸与人像的动态艺术视觉">
+      {[0, 1].map((index) => (
+        <video
+          key={index}
+          ref={(node) => { videoRefs.current[index] = node; }}
+          className={`hero-background-video ${visibleIndex === index ? "is-visible" : ""}`}
+          src="/profile/hero-fishbowl.mp4"
+          autoPlay={index === 0}
+          muted
+          playsInline
+          preload="auto"
+          onTimeUpdate={() => beginCrossfade(index)}
+        />
+      ))}
+    </div>
+  );
+}
+
 function Hero() {
   return (
     <section className="editor-hero" id="top">
+      <CrossfadeHeroVideo />
       <div className="hero-intro">
         <h1 style={{ fontWeight: 600 }}>Video<br />Creator</h1>
       </div>
       <div className="portrait-frame">
         <img src="/profile/hero-subway.jpg" alt="吴义博在地铁站台的肖像" decoding="async" />
-      </div>
-      <div className="hero-sidecopy">
-        <p className="hero-summary" style={{ fontWeight: 500 }}>
-          <span style={{ width: "100%" }}>你好，我是吴义博。</span>
-          <span style={{ width: "86%" }}>用影像讲故事，以 AI 重塑生产力。</span>
-          <span style={{ width: "76%" }}>持续创造直观、有温度的数字体验。</span>
-        </p>
       </div>
     </section>
   );
@@ -354,12 +427,16 @@ function Stats() {
     <section className="stats-section">
       <div className="stats-lead"><h2>视频不只是画面的流动，更是思想与 AI 碰撞的艺术。</h2></div>
       <p className="stats-note">从真实世界的现场，到生成式影像的实验，我关心内容如何被看见，也关心它如何被更高效地生产。</p>
-      <div className="stats-grid"><div><strong>41</strong><span>本站视频作品</span></div><div><strong>5</strong><span>核心创作方向</span></div><div><strong>1000W+</strong><span>全网播放量</span></div></div>
+      <div className="stats-grid"><div><strong>43</strong><span>本站视频作品</span></div><div><strong>5</strong><span>核心创作方向</span></div><div><strong>1000W+</strong><span>全网播放量</span></div></div>
     </section>
   );
 }
 
 const AutoplayPreview = memo(function AutoplayPreview({ video }) {
+  if (video.previewGif) {
+    return <img src={video.previewGif} alt="" aria-hidden="true" />;
+  }
+
   const videoRef = useRef(null);
   const [isNearViewport, setIsNearViewport] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
@@ -433,12 +510,12 @@ function VideoGallery({ title, videos, description, onOpen }) {
           <button className="video-tile" type="button" onClick={() => onOpen(index)} aria-label={`播放${getDisplayTitle(video)}`}>
             <AutoplayPreview video={video} />
             <span className="tile-shade" aria-hidden="true" />
-            <span className="tile-play" aria-hidden="true"><Play size={18} fill="currentColor" /></span>
           </button>
-          <figcaption className="video-caption">
-            <strong>{getDisplayTitle(video)}</strong>
-            <small>{formatDuration(video.duration)}{getVideoDetails(video).award || video.metaDescription || description ? ` / ${getVideoDetails(video).award || video.metaDescription || description}` : ""}</small>
-          </figcaption>
+          {!captionlessGalleryVideoIds.has(video.id) && (
+            <figcaption className="video-caption">
+              <strong>{getDisplayTitle(video)}</strong>
+            </figcaption>
+          )}
         </figure>
       ))}
     </div>
@@ -449,6 +526,23 @@ function VideoGallery({ title, videos, description, onOpen }) {
       {landscapeVideos.length > 0 && <div className="video-group landscape-group">{renderVideos(landscapeVideos)}</div>}
       {portraitVideos.length > 0 && <div className="video-group portrait-group">{renderVideos(portraitVideos)}</div>}
     </div>
+  );
+}
+
+function LabeledGalleryRow({ className = "", title, videos, allVideos, collectionTitle, onOpen }) {
+  const indexById = new Map(allVideos.map((video, index) => [video.id, index]));
+
+  return (
+    <section className={`labeled-gallery-row ${className}`} aria-label={title}>
+      <header className="labeled-gallery-heading"><h3>{title}</h3></header>
+      <div className="labeled-gallery-media">
+        <VideoGallery
+          title={title}
+          videos={videos}
+          onOpen={(localIndex) => onOpen(allVideos, indexById.get(videos[localIndex].id), collectionTitle)}
+        />
+      </div>
+    </section>
   );
 }
 
@@ -469,13 +563,12 @@ const Works = memo(function Works({ manifest, onOpen }) {
       id: "newtestament",
       title: "AIGC 知识视频",
       kicker: "02 / AI 全素材生成与视觉叙事",
-      description: "根据甲方提供的配音旁白，独立完成视觉拆解、AI 素材生成、镜头设计、动态影像制作与后期剪辑，将文字叙述转化为完整、连贯的知识短视频。视频中的人物、场景与视觉素材均由 AI 生成。",
       ids: ["newtestament"]
     },
     {
       id: "academy",
       title: "纪录片学院奖片花",
-      heading: <>第十五届“光影纪年”<br />中国纪录片学院奖片花</>,
+      heading: "第十五届“光影纪年”中国纪录片学院奖片花",
       kicker: "03 / 纪录片片花",
       ids: ["academy"]
     },
@@ -510,20 +603,70 @@ const Works = memo(function Works({ manifest, onOpen }) {
     return <VideoGallery title={title} videos={videos} onOpen={(videoIndex) => onOpen(videos, videoIndex, title)} />;
   };
 
-  return (
-    <section className="editor-works" id="works">
-      <nav className="category-tabs" aria-label="作品分类">
-        {highlights.map((item) => <a href={item.href} key={item.href}>{item.label}<ArrowRight size={14} /></a>)}
-      </nav>
-      {categories.map((category) => (
-        <section className="chapter category-section" id={category.id} key={category.id}>
+  const renderReelshortRows = () => {
+    const videos = getWorkVideos("ai");
+    return (
+      <div className="split-category-gallery">
+        <LabeledGalleryRow
+          className="labeled-gallery-row--aigc"
+          title="AIGC视频"
+          videos={videos.filter((video) => video.orientation !== "portrait")}
+          allVideos={videos}
+          collectionTitle="ReelShort 短剧"
+          onOpen={onOpen}
+        />
+        <LabeledGalleryRow
+          className="labeled-gallery-row--reelshort"
+          title="ReelShort 短剧"
+          videos={videos.filter((video) => video.orientation === "portrait")}
+          allVideos={videos}
+          collectionTitle="ReelShort 短剧"
+          onOpen={onOpen}
+        />
+      </div>
+    );
+  };
+
+  const renderKnowledgeRows = (category) => {
+    const videos = getWorkVideos("newtestament");
+    const oralVideo = videos.filter((video) => video.id === "yiyan-nanjing");
+    const knowledgeVideos = videos.filter((video) => video.id !== "yiyan-nanjing");
+    return (
+      <>
+        <section className="knowledge-video-row">
           <header className="category-heading">
             <h3>{category.heading || category.title}</h3>
             {category.description && <p>{category.description}</p>}
           </header>
           <div className="category-content">
-            {category.subgroups ? category.subgroups.map((group) => <section className="subcategory" key={group.title}><h4>{group.title}</h4><div className="subcategory-gallery">{renderGallery(group.ids, group.durationRule, group.title)}</div></section>) : <div className="category-gallery">{renderGallery(category.ids, undefined, category.title)}</div>}
+          <div className="knowledge-gallery category-gallery">
+            <VideoGallery title="AIGC 知识视频" videos={knowledgeVideos} onOpen={(videoIndex) => onOpen(videos, videoIndex, "AIGC 知识视频")} />
+            </div>
           </div>
+        </section>
+        <LabeledGalleryRow
+          className="labeled-gallery-row--oral"
+          title="口播视频"
+          videos={oralVideo}
+          allVideos={videos}
+          collectionTitle="AIGC 知识视频"
+          onOpen={onOpen}
+        />
+      </>
+    );
+  };
+
+  return (
+    <section className="editor-works" id="works">
+      {categories.map((category) => (
+        <section className={`chapter category-section category-section--${category.id}`} id={category.id} key={category.id}>
+          {category.id !== "reelshort" && category.id !== "newtestament" && <header className="category-heading">
+            <h3>{category.heading || category.title}</h3>
+            {category.description && <p>{category.description}</p>}
+          </header>}
+          {category.id === "newtestament" ? renderKnowledgeRows(category) : <div className="category-content">
+            {category.id === "reelshort" ? renderReelshortRows() : category.subgroups ? category.subgroups.map((group) => <section className="subcategory" key={group.title}><h4>{group.title}</h4><div className="subcategory-gallery">{renderGallery(group.ids, group.durationRule, group.title)}</div></section>) : <div className="category-gallery">{renderGallery(category.ids, undefined, category.title)}</div>}
+          </div>}
         </section>
       ))}
     </section>
@@ -531,25 +674,65 @@ const Works = memo(function Works({ manifest, onOpen }) {
 });
 
 function VideoModal({ viewer, onClose, onChange }) {
-  const closeButtonRef = useRef(null);
+  const frameRef = useRef(null);
+  const videoRef = useRef(null);
   const [failed, setFailed] = useState(false);
   const [sourceIndex, setSourceIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [aspectRatio, setAspectRatio] = useState(16 / 9);
   const { videos, index, collectionTitle } = viewer;
   const video = videos[index];
   const details = getVideoDetails(video);
-  const playbackSources = [`/api/video/${video.id}?mapping=2`, video.src, `/previews/${video.id}.mp4`];
+  const playbackSources = [`/api/video/${video.id}?mapping=2`, `/previews/${video.id}.mp4`];
   const playbackSrc = playbackSources[sourceIndex];
 
   useEffect(() => {
     setFailed(false);
     setSourceIndex(0);
+    setIsPlaying(true);
+    setCurrentTime(0);
+    setDuration(0);
+    setAspectRatio(video.orientation === "portrait" ? 9 / 16 : 16 / 9);
   }, [video.id]);
+
+  const togglePlayback = () => {
+    const element = videoRef.current;
+    if (!element) return;
+    if (element.paused) element.play().catch(() => {});
+    else element.pause();
+  };
+
+  const changeVolume = (event) => {
+    const element = videoRef.current;
+    if (!element) return;
+    const nextVolume = Number(event.target.value);
+    element.volume = nextVolume;
+    element.muted = nextVolume === 0;
+    setVolume(nextVolume);
+    setIsMuted(nextVolume === 0);
+  };
+
+  const seek = (event) => {
+    const element = videoRef.current;
+    if (!element) return;
+    element.currentTime = Number(event.target.value);
+    setCurrentTime(element.currentTime);
+  };
+
+  const toggleFullscreen = () => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else frame.requestFullscreen?.();
+  };
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
-
     const handleKeyDown = (event) => {
       if (event.key === "Escape") onClose();
       if (event.key === "ArrowLeft") onChange((index - 1 + videos.length) % videos.length);
@@ -578,20 +761,33 @@ function VideoModal({ viewer, onClose, onChange }) {
 
   return (
     <div className="video-modal" role="dialog" aria-modal="true" aria-labelledby="video-modal-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <div className="spatial-backdrop" style={{ backgroundImage: `url(${video.poster})` }} aria-hidden="true" />
       <div className={`modal-shell ${video.orientation}`}>
-        <div className={`player-stage ${video.orientation}`}>
-          <div className="video-frame">
+        <button className="spatial-close" type="button" onClick={onClose} aria-label="关闭播放器"><PlayerGlyph name="close" size={20} /></button>
+        <div className="spatial-main">
+          <div className={`player-stage ${video.orientation}`} style={{ "--video-ratio": aspectRatio }}>
+          <div className="video-frame" ref={frameRef}>
             {failed ? (
-              <div className="player-error"><Play size={30} /><strong>暂时无法播放此视频</strong><span>请检查本地素材文件是否完整。</span></div>
+              <div className="player-error"><PlayerGlyph name="play" size={32} /><strong>暂时无法播放此视频</strong><span>请检查本地素材文件是否完整。</span></div>
             ) : (
               <video
                 key={playbackSrc}
+                ref={videoRef}
                 src={playbackSrc}
                 poster={video.poster}
-                controls
                 autoPlay
                 playsInline
                 preload="metadata"
+                onClick={togglePlayback}
+                onLoadedMetadata={(event) => {
+                  const element = event.currentTarget;
+                  setDuration(element.duration || 0);
+                  if (element.videoWidth && element.videoHeight) setAspectRatio(element.videoWidth / element.videoHeight);
+                }}
+                onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onVolumeChange={(event) => setIsMuted(event.currentTarget.muted || event.currentTarget.volume === 0)}
                 onError={() => {
                   if (sourceIndex < playbackSources.length - 1) {
                     setSourceIndex(sourceIndex + 1);
@@ -602,34 +798,56 @@ function VideoModal({ viewer, onClose, onChange }) {
               />
             )}
           </div>
+          </div>
         </div>
-        <aside className="modal-info">
-          <button className="modal-close" ref={closeButtonRef} type="button" onClick={onClose} aria-label="关闭播放器"><X size={22} /></button>
-          <div className="modal-info-copy">
-            <span className="modal-info-label">PROJECT</span>
-            <strong id="video-modal-title">{getDisplayTitle(video)}</strong>
-            <p>{collectionTitle}</p>
-            {details.award && <p className="modal-award">{details.award}</p>}
-            {details.description && <p className="modal-description">{details.description}</p>}
-            <dl>
-              <div><dt>ROLE</dt><dd>{video.metaDescription || "视频作品"}</dd></div>
-              <div><dt>FORMAT</dt><dd>{video.orientation === "portrait" ? "Vertical video" : "Landscape video"}</dd></div>
-            </dl>
-            {details.links?.length > 0 && (
-              <div className="modal-links">
-                {details.links.map((link) => (
-                  <a href={link.href} key={link.href} target="_blank" rel="noreferrer">
-                    {link.label}<ExternalLink size={13} />
-                  </a>
-                ))}
+        {video.orientation !== "portrait" && (
+          <aside className="spatial-rail">
+            <div className="spatial-intro">
+              {details.award && <p className="intro-award">{details.award}</p>}
+              <p className="intro-description">{details.description || video.metaDescription || "视频作品选集，记录从创意、素材到成片的影像实践。"}</p>
+              <dl className="intro-meta">
+                <div><dt>ROLE</dt><dd>{video.metaDescription || "导演 / 剪辑"}</dd></div>
+              </dl>
+              {details.links?.length > 0 && <div className="intro-links">{details.links.map((link) => <a href={link.href} key={link.href} target="_blank" rel="noreferrer">{link.label}<PlayerGlyph name="external" size={14} /></a>)}</div>}
+            </div>
+          </aside>
+        )}
+        {!failed && (
+          <div className="player-controls">
+            <div className="player-controls-row">
+              <button type="button" onClick={() => { if (videoRef.current) videoRef.current.currentTime -= 10; }} aria-label="后退十秒"><PlayerGlyph name="rewind" size={21} /></button>
+              <button type="button" onClick={togglePlayback} aria-label={isPlaying ? "暂停" : "播放"}>
+                {isPlaying ? <PlayerGlyph name="pause" size={21} /> : <PlayerGlyph name="play" size={21} />}
+              </button>
+              <button type="button" onClick={() => { if (videoRef.current) videoRef.current.currentTime += 10; }} aria-label="前进十秒"><PlayerGlyph name="forward" size={21} /></button>
+              <div className="now-playing">
+                <img src={video.poster} alt="" />
+                <span><strong id="video-modal-title">{getDisplayTitle(video)}</strong><small>{collectionTitle}</small></span>
+                <PlayerGlyph name="more" size={18} />
               </div>
-            )}
+              <label className="volume-control" aria-label="音量调节">
+                {isMuted ? <PlayerGlyph name="muted" size={20} /> : <PlayerGlyph name="volume" size={20} />}
+                <input type="range" min="0" max="1" step="0.02" value={volume} onChange={changeVolume} aria-label="音量" />
+              </label>
+              <button type="button" onClick={toggleFullscreen} aria-label="全屏播放"><PlayerGlyph name="fullscreen" size={21} /></button>
+            </div>
+            <div className="player-timeline">
+              <span>{formatDuration(Math.floor(currentTime)) || "0:00"}</span>
+              <input
+                className="player-progress"
+                type="range"
+                min="0"
+                max={duration || 0}
+                step="0.1"
+                value={Math.min(currentTime, duration || 0)}
+                onChange={seek}
+                aria-label="视频进度"
+                style={{ "--player-progress": `${duration ? (currentTime / duration) * 100 : 0}%` }}
+              />
+              <span>{formatDuration(Math.floor(duration)) || "0:00"}</span>
+            </div>
           </div>
-          <div className="modal-nav" aria-label="切换作品">
-            <button type="button" onClick={() => onChange((index - 1 + videos.length) % videos.length)} aria-label="上一个作品"><ChevronLeft size={18} /></button>
-            <button type="button" onClick={() => onChange((index + 1) % videos.length)} aria-label="下一个作品"><ChevronRight size={18} /></button>
-          </div>
-        </aside>
+        )}
       </div>
     </div>
   );
@@ -655,21 +873,12 @@ function ResearchBlock() {
 function Experience() {
   return (
     <section className="editor-experience" id="experience">
-      <div className="experience-intro">
-        <div>
-          <span className="experience-pill">Experience</span>
-          <h2>以影像实践，<br />记录每一步成长。</h2>
-        </div>
-        <p>从工程执行、品牌内容到央媒纪录片与 AIGC 短剧，持续扩展创作方法与制作边界。</p>
-      </div>
       <div className="experience-list">
         {experiences.map((item) => (
           <article key={`${item.title}-${item.time}`}>
             <div className="experience-copy">
               <h3>{item.role} · {item.title}</h3>
-              <p>{item.body}</p>
             </div>
-            <time>{item.time}</time>
           </article>
         ))}
       </div>
@@ -688,7 +897,7 @@ function Footer() {
 
         <div className="footer-contact-grid">
           <div><strong>Location</strong><span>中国 · 北京</span><span>支持线上办公</span></div>
-          <div><strong>Email Address</strong><a href="mailto:754087377@qq.com">754087377@qq.com</a></div>
+          <div><strong>Email Address</strong><a href="mailto:wu.yibo@foxmail.com">wu.yibo@foxmail.com</a></div>
           <div><strong>Phone Number</strong><a href="tel:18800102979">18800102979</a><span>微信同号</span></div>
         </div>
       </div>
@@ -697,7 +906,6 @@ function Footer() {
         <span>© 2026 吴义博 · All rights reserved</span>
         <nav aria-label="页脚导航">
           <a href="#works">作品</a>
-          <a href="#experience">经历</a>
           <a href="#contact">联系</a>
           <a href="#top">返回顶部</a>
         </nav>
@@ -721,7 +929,7 @@ function App() {
         const resolvedManifest = Object.fromEntries(
           Object.entries(data).map(([category, videos]) => [
             category,
-            videos.map((video) => ({ ...video, src: resolveMediaUrl(video.src) }))
+            videos
           ])
         );
         setManifest(resolvedManifest);
@@ -749,9 +957,7 @@ function App() {
       <Header />
       <main>
         <Hero />
-        <Stats />
         <Works manifest={manifest} onOpen={openViewer} />
-        <Experience />
       </main>
       <Footer />
       {viewer && <VideoModal viewer={viewer} onClose={closeViewer} onChange={changeVideo} />}

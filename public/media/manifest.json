@@ -1,6 +1,16 @@
 {
   "ai": [
     {
+      "id": "white-horse-wedding",
+      "title": "白马婚礼",
+      "src": "/previews/white-horse-wedding.mp4",
+      "poster": "/media/user-previews/white-horse-wedding.jpg",
+      "width": 720,
+      "height": 405,
+      "duration": 0,
+      "orientation": "landscape"
+    },
+    {
       "id": "ai-manga-01",
       "title": "灯神流浪汉救麻袋女",
       "src": "/media/ai-manga/ai-manga-01.mp4",
@@ -404,6 +414,16 @@
       "width": 1920,
       "height": 1080,
       "duration": 262,
+      "orientation": "landscape"
+    },
+    {
+      "id": "yiyan-nanjing",
+      "title": "一言难靖预告片",
+      "src": "/previews/yiyan-nanjing.mp4",
+      "poster": "/media/user-previews/yiyan-nanjing.jpg",
+      "width": 720,
+      "height": 405,
+      "duration": 0,
       "orientation": "landscape"
     }
   ],

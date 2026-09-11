@@ -6,3 +6,4 @@ skills-lock.json
 *.zip
 .DS_Store
 *.log
+.env.local

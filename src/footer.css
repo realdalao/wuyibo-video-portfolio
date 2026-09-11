@@ -3,7 +3,7 @@
   margin: 0;
   padding: 0 max(24px, calc((100% - 1440px) / 2));
   color: #f2f2f2;
-  background: #080808;
+  background: #000;
 }
 
 .footer-main {
@@ -31,13 +31,13 @@
 
 .footer-logo span {
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 64px;
+  height: 64px;
   place-items: center;
   border-radius: 8px;
-  color: #080808;
+  color: #000;
   background: #f2f2f2;
-  font-size: 20px;
+  font-size: 34px;
   font-weight: 600;
 }
 
@@ -90,14 +90,16 @@
 .footer-contact-grid strong {
   margin-bottom: 6px;
   color: rgba(255, 255, 255, 0.92);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
 }
 
 .footer-contact-grid span,
 .footer-contact-grid a {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 13px;
+  font-family: "Source Han Serif SC", "Noto Serif SC", "Huiwen-mincho", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
+  font-size: 11px;
+  font-weight: 400;
   line-height: 1.35;
   overflow-wrap: anywhere;
   transition: color 180ms ease;
@@ -155,5 +157,28 @@
   .footer-lower nav {
     flex-wrap: wrap;
     gap: 14px 24px;
+  }
+}
+
+/* The footer rule is a page boundary, so it runs edge to edge.  The content
+   itself remains on the same inner rail as the rest of the footer. */
+.editor-footer {
+  width: 100%;
+  max-width: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.editor-footer .footer-main {
+  border-top: 0 !important;
+}
+
+/* Align the introduction to the visible W glyph rather than its 64px tile. */
+.editor-footer .footer-brand p {
+  margin-left: 28px;
+}
+
+@media (max-width: 620px) {
+  .editor-footer .footer-brand p {
+    margin-left: 0;
   }
 }
