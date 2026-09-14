@@ -5436,9 +5436,10 @@ video,
 }
 
 .hero-text-loop {
-  width: min(1180px, calc(100% - 48px));
-  margin-right: auto;
-  margin-left: auto;
+  width: 100%;
+  max-width: none;
+  margin-right: 0;
+  margin-left: 0;
   /* The ribbon is a continuous strip; rounded lower corners expose the
      background as two unwanted notches at its ends. */
   border-radius: 0 !important;
@@ -5446,8 +5447,7 @@ video,
 }
 
 @media (max-width: 720px) {
-  .editor-hero,
-  .hero-text-loop {
+  .editor-hero {
     width: calc(100% - 24px);
   }
 
@@ -5458,6 +5458,7 @@ video,
   }
 
   .hero-text-loop {
+    width: 100%;
     border-radius: 0 !important;
   }
 }
