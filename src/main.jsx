@@ -1120,8 +1120,8 @@ function Footer() {
 
 function App() {
   const [manifest, setManifest] = useState({});
-  const [manifestReady, setManifestReady] = useState(false);
-  const [pageReady, setPageReady] = useState(false);
+  const [manifestReady, setManifestReady] = useState(true);
+  const [pageReady, setPageReady] = useState(true);
   const [viewer, setViewer] = useState(null);
   const [isViewerClosing, setIsViewerClosing] = useState(false);
   const restoreFocusRef = useRef(null);
