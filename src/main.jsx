@@ -23,8 +23,8 @@ import DecryptedText from "./components/ui/DecryptedText";
 const portfolioSource = "https://fcnapthanwru.feishu.cn/wiki/VNwkwSqvriUfmrklQQNc2mNanJE?from=from_copylink";
 const localLikeStorageKey = (videoId) => `portfolio_local_like:${videoId}`;
 const heroAlphaSources = {
-  webm: "/profile/hero-fishbowl-alpha.webm",
-  safari: "/profile/hero-fishbowl-alpha.mp4"
+  webm: { src: "/profile/hero-fishbowl-alpha.webm", fallback: false },
+  safari: { src: "/profile/hero-fishbowl.mp4", fallback: true }
 };
 
 function getHeroAlphaSource() {
@@ -514,8 +514,8 @@ function CrossfadeHeroVideo() {
         <video
           key={index}
           ref={(node) => { videoRefs.current[index] = node; }}
-          className={`hero-background-video ${visibleIndex === index ? "is-visible" : ""}`}
-          src={heroSource}
+          className={`hero-background-video ${heroSource.fallback ? "hero-background-video--safari-fallback" : ""} ${visibleIndex === index ? "is-visible" : ""}`}
+          src={heroSource.src}
           autoPlay={index === 0}
           muted
           playsInline
