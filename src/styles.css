@@ -4951,10 +4951,9 @@ video,
   opacity: 1;
 }
 
-/* Safari cannot reliably decode the HEVC Alpha stream. Its H.264 fallback has
-   a black matte, which screen blending turns into the surrounding page tone. */
+/* Safari uses the original non-transparent H.264 Hero video. */
 .hero-video-crossfade .hero-background-video--safari-fallback {
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
   z-index: 1;
 }
 

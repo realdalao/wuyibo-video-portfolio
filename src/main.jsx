@@ -24,7 +24,7 @@ const portfolioSource = "https://fcnapthanwru.feishu.cn/wiki/VNwkwSqvriUfmrklQQN
 const localLikeStorageKey = (videoId) => `portfolio_local_like:${videoId}`;
 const heroAlphaSources = {
   webm: { src: "/profile/hero-fishbowl-alpha.webm?v=5", fallback: false },
-  safari: { src: "/profile/hero-fishbowl.mp4?v=5", fallback: true }
+  safari: { src: "/profile/hero-fishbowl.mp4?v=7", fallback: true }
 };
 
 function getHeroAlphaSource() {
