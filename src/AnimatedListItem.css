@@ -1,0 +1,15 @@
+.animated-video-list-item {
+  min-width: 0;
+  transform-origin: center;
+}
+
+.animated-video-list-item > .video-card {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-video-list-item {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

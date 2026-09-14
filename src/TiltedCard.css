@@ -1,0 +1,48 @@
+.tilted-card-figure {
+  position: relative;
+  width: 100%;
+  perspective: 620px;
+  overflow: visible;
+  z-index: 0;
+  transition: z-index 0s 180ms;
+}
+
+.video-card {
+  contain: layout !important;
+  overflow: visible !important;
+}
+
+.video-card:has(.tilted-card-figure:hover) {
+  z-index: 8;
+}
+
+.tilted-card-figure:hover {
+  z-index: 8;
+  transition-delay: 0s;
+}
+
+.tilted-card-inner {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.tilted-card-inner > .video-tile {
+  width: 100%;
+  transform: translateZ(0);
+}
+
+.tilted-card-figure:hover .video-tile video,
+.tilted-card-figure:hover .video-tile img,
+.tilted-card-figure:focus-within .video-tile video,
+.tilted-card-figure:focus-within .video-tile img {
+  transform: scale(1.001) !important;
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .tilted-card-inner {
+    transform: none !important;
+  }
+}

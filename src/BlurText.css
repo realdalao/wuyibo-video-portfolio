@@ -1,0 +1,21 @@
+.blur-text {
+  display: inline-flex;
+  flex-wrap: wrap;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+}
+
+.blur-text-segment {
+  display: inline-block;
+  will-change: transform, filter, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blur-text-segment {
+    filter: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,20 @@
+.shimmer-text-wrap {
+  overflow: hidden;
+}
+
+.shimmer-text {
+  display: inline-block;
+  color: #fff !important;
+  background: currentColor linear-gradient(
+    to right,
+    currentColor 0%,
+    rgba(0, 0, 0, 0.72) 42%,
+    rgba(0, 0, 0, 0.72) 58%,
+    currentColor 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 50% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

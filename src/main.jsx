@@ -1,4 +1,5 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
 import {
   ArrowRight,
@@ -9,8 +10,41 @@ import {
 import "./styles.css";
 import "./experience.css";
 import "./footer.css";
+import FoldText from "./FoldText";
+import BlurText from "./BlurText";
+import "./BlurText.css";
+import TiltedCard from "./TiltedCard";
+import GlareHover from "./GlareHover";
+import AnimatedListItem from "./AnimatedListItem";
+import PageLoader from "./components/ui/PageLoader";
+import VideoAmbient from "./components/ui/VideoAmbient";
+import DecryptedText from "./components/ui/DecryptedText";
+
+const TextLoop = lazy(() => import("./TextLoop"));
 
 const portfolioSource = "https://fcnapthanwru.feishu.cn/wiki/VNwkwSqvriUfmrklQQNc2mNanJE?from=from_copylink";
+const localLikeStorageKey = (videoId) => `portfolio_local_like:${videoId}`;
+
+function getLocalLikeState(videoId) {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(localLikeStorageKey(videoId)) || "null");
+    return {
+      count: Math.max(0, Number(saved?.count) || 0),
+      liked: Boolean(saved?.liked)
+    };
+  } catch {
+    return { count: 0, liked: false };
+  }
+}
+
+function saveLocalLikeState(videoId, state) {
+  try {
+    window.localStorage.setItem(localLikeStorageKey(videoId), JSON.stringify(state));
+  } catch {
+    // Storage can be unavailable in private browsing; the in-memory UI still updates.
+  }
+}
+
 const highlights = [
   { label: "ReelShort 短剧", href: "#reelshort", copy: "AIGC 短剧生产与交付" },
   { label: "AIGC 知识视频", href: "#newtestament", copy: "AI 全素材生成与视觉叙事" },
@@ -46,7 +80,7 @@ const works = [
     title: "纪录片学院奖片花",
     role: "核心片花剪辑",
     client: "第十五届“光影纪年”中国纪录片学院奖",
-    description: "独立剪辑《窗外是蓝星》《绿色星球 2：城市天际线》《正义的审判》《河湟三章·河》《如何与莉迪亚交谈？》等获奖片花。",
+    description: "为第十五届“光影纪年”中国纪录片学院奖独立完成多部获奖及提名作品的官方片花剪辑。",
     links: [{ label: "查看作品集", href: portfolioSource }]
   },
   {
@@ -144,6 +178,51 @@ const works = [
   }
 ];
 
+const commercialVideoOrder = ["xiaomi-05", "xiaomi-06", "xiaomi-07", "xiaomi-01", "xiaomi-02", "xiaomi-03", "xiaomi-04"];
+
+function getWorkVideosForDisplay(manifest, id, durationRule) {
+  const work = works.find((item) => item.id === id);
+  if (!work) return [];
+  let videos = manifest[work.category] || [];
+  if (work.videoIds) videos = work.videoIds.map((videoId) => videos.find((video) => video.id === videoId)).filter(Boolean);
+  if (work.id === "commercial") videos = commercialVideoOrder.map((videoId) => videos.find((video) => video.id === videoId)).filter(Boolean);
+  if (durationRule === "long") videos = videos.filter((video) => video.duration > 20 * 60);
+  if (durationRule === "short") videos = videos.filter((video) => video.duration <= 20 * 60);
+  return videos.map((video) => ({
+    ...video,
+    metaDescription: work.role,
+    projectDescription: work.description,
+    collectionTitle: work.title
+  }));
+}
+
+function galleryDisplayOrder(videos) {
+  return [
+    ...videos.filter((video) => video.orientation !== "portrait"),
+    ...videos.filter((video) => video.orientation === "portrait")
+  ];
+}
+
+function buildPortfolioVideoQueue(manifest) {
+  const knowledgeVideos = getWorkVideosForDisplay(manifest, "newtestament");
+  const pageSections = [
+    galleryDisplayOrder(getWorkVideosForDisplay(manifest, "ai")),
+    galleryDisplayOrder(getWorkVideosForDisplay(manifest, "academy")),
+    galleryDisplayOrder(["xinhua", "tibet", "xiangxin"].flatMap((id) => getWorkVideosForDisplay(manifest, id, "long"))),
+    galleryDisplayOrder(["yangsheng-xinhua", "xinhua-more", "xinhua-animation", "xinhua", "xiangxin", "tibet"].flatMap((id) => getWorkVideosForDisplay(manifest, id, "short"))),
+    galleryDisplayOrder(knowledgeVideos),
+    galleryDisplayOrder(getWorkVideosForDisplay(manifest, "guangxi")),
+    galleryDisplayOrder(getWorkVideosForDisplay(manifest, "commercial")),
+    galleryDisplayOrder(getWorkVideosForDisplay(manifest, "student"))
+  ];
+  const seen = new Set();
+  return pageSections.flat().filter((video) => {
+    if (seen.has(video.id)) return false;
+    seen.add(video.id);
+    return true;
+  });
+}
+
 const experiences = [
   { time: "2026.04 - 2026.06", title: "ReelShort", role: "AI 短剧实习生", body: "使用 AIGC 工具完成短剧生产、审核、返修和交付，把生成能力落到稳定的视频流程中。" },
   { time: "2025.07 - 2025.10", title: "新华社", role: "编导 / 剪辑实习生", body: "参与《我们的故宫》《向新而行》《西藏一日》等重磅视频项目，并承担高规格报道任务的拍摄执行。" },
@@ -174,6 +253,8 @@ const displayTitleById = {
   "newtestament-01": "为什么罗马皇帝都叫“凯撒”？",
   "newtestament-02": "十字架的由来",
   "newtestament-03": "凯撒的归凯撒，上帝的归上帝",
+  "newtestament-04": "666 到底是什么？",
+  "newtestament-05": "耶稣讲过的“富二代”有多败家？",
   "yiyan-nanjing": "一言难靖预告片",
   "documentary-trailers-01": "《窗外是蓝星》",
   "documentary-trailers-02": "《方舟·布氏鲸》",
@@ -222,6 +303,14 @@ const videoDetailsById = {
   },
   "newtestament-03": {
     description: "重新理解“凯撒的归凯撒，上帝的归上帝”所处的时代与文本脉络。"
+  },
+  "newtestament-04": {
+    description: "666，是《启示录》中最神秘、也最令人害怕的一个数字。\n\n有人说，它代表撒但；有人说，它预示世界末日；也有人把它与各种都市传说和阴谋论联系在一起。但很多人不知道，在两千年前，《启示录》的第一批读者，看到666时，想到的或许根本不是恶魔，而是一位真实存在的罗马皇帝——尼禄。\n\n本集带你回到罗马帝国最黑暗的年代，从约翰被流放拔摩岛、《启示录》的异象，到尼禄迫害基督徒，以及希伯来字母数字（Gematria）的文化背景，一起重新认识666真正可能代表的意思。",
+    links: [{ label: "B站观看", href: "https://www.bilibili.com/video/BV1sdt46oEkS/" }]
+  },
+  "newtestament-05": {
+    description: "“浪子回头金不换”，是中国人耳熟能详的一句话。\n\n但早在两千年前，耶稣就讲过一个关于“浪子”的故事：一个富家少爷，在父亲还活着的时候就要求分家产，带着巨额财富远走他乡，最后却把一切挥霍殆尽，甚至沦落到替人放猪。\n\n\n如果把这个故事当成一则两千年前的“财经新闻”，这位浪子究竟拿走了多少家产？他的家庭到底有多富有？而当他一无所有地回家时，等待他的又是什么？\n\n本集《新约百晓生》，从古代犹太人的继承制度、土地与家族财产出发，重新读一次耶稣最著名的比喻之一——浪子的比喻。\n\n《新约百晓生》是一档历史文化节目，每一集解答一个问题，从历史、文化、语言与考古等角度出发，带你走进《新约》背后的真实世界。",
+    links: [{ label: "B站观看", href: "https://www.bilibili.com/video/BV1noYH6JE2g/" }]
   },
   "yiyan-nanjing": {
     description: "一言难靖预告片。"
@@ -273,7 +362,16 @@ const videoDetailsById = {
   "xiaomi-07": { description: "期待已久的冰天雪地极速赛道心率监测来了，带你体验从初级到高级雪道的心跳加速。" }
 };
 
-const captionlessGalleryVideoIds = new Set(["palace-01", "palace-03", "palace-04", "palace-05"]);
+const captionlessGalleryVideoIds = new Set(["white-horse-wedding", "palace-01", "palace-03", "palace-04", "palace-05"]);
+const playerSummaryHiddenIds = new Set(["white-horse-wedding", "yiyan-nanjing", "course-02"]);
+
+function hidesPlayerSummary(videoId) {
+  return playerSummaryHiddenIds.has(videoId) || videoId.startsWith("ai-manga-");
+}
+
+function hidesPlayerTitle(videoId) {
+  return videoId === "white-horse-wedding" || videoId.startsWith("ai-manga-");
+}
 
 function getVideoDetails(video) {
   return videoDetailsById[video.id] || {};
@@ -281,6 +379,13 @@ function getVideoDetails(video) {
 
 function getDisplayTitle(video) {
   return displayTitleById[video.id] || video.title;
+}
+
+function formatVideoDuration(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "时长待定";
+  const minutes = Math.floor(seconds / 60);
+  const remainder = Math.floor(seconds % 60);
+  return minutes ? `${minutes}:${String(remainder).padStart(2, "0")}` : `0:${String(remainder).padStart(2, "0")}`;
 }
 
 // Start only nearby previews in a short queue so scrolling never triggers
@@ -412,13 +517,41 @@ function Hero() {
   return (
     <section className="editor-hero" id="top">
       <CrossfadeHeroVideo />
-      <div className="hero-intro">
-        <h1 style={{ fontWeight: 600 }}>Video<br />Creator</h1>
+      <div className="hero-intro hero-intro--video">
+        <h1 className="hero-depth-title"><span className="hero-static-title">VIDEO</span></h1>
+      </div>
+      <div className="hero-intro hero-intro--creator">
+        <h1 className="hero-depth-title"><span className="hero-static-title">CREATOR</span></h1>
       </div>
       <div className="portrait-frame">
         <img src="/profile/hero-subway.jpg" alt="吴义博在地铁站台的肖像" decoding="async" />
       </div>
     </section>
+  );
+}
+
+function HeroDivider() {
+  return (
+    <Suspense fallback={null}>
+      <TextLoop
+        className="hero-text-loop"
+        text="VIDEO CREATOR · AIGC · DIRECTING · EDITING"
+        shape="line"
+        speed={82}
+        direction="forward"
+        separator="✦"
+        curviness={0}
+        fontSize={34}
+        fontWeight={600}
+        letterSpacing={2}
+        uppercase
+        color="#ffffff"
+        ribbon
+        ribbonColor="#ad2831"
+        ribbonWidth={76}
+        pauseOnHover
+      />
+    </Suspense>
   );
 }
 
@@ -440,7 +573,9 @@ const AutoplayPreview = memo(function AutoplayPreview({ video }) {
   const videoRef = useRef(null);
   const [isNearViewport, setIsNearViewport] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
-  const previewSrc = previewFailed ? video.src : `/previews/${video.id}.mp4`;
+  const previewSrc = previewFailed
+    ? (video.remoteStream ? undefined : video.src)
+    : `/previews/${video.id}.mp4`;
 
   useEffect(() => {
     const element = videoRef.current;
@@ -505,18 +640,45 @@ function VideoGallery({ title, videos, description, onOpen }) {
 
   const renderVideos = (items) => (
     <div className="video-gallery">
-      {items.map(({ video, index }) => (
-        <figure className={`video-card ${video.orientation}`} key={video.id}>
-          <button className="video-tile" type="button" onClick={() => onOpen(index)} aria-label={`播放${getDisplayTitle(video)}`}>
-            <AutoplayPreview video={video} />
-            <span className="tile-shade" aria-hidden="true" />
-          </button>
+      {items.map(({ video, index }, itemIndex) => (
+        <AnimatedListItem key={video.id} index={index} delay={Math.min(itemIndex * 0.055, 0.22)}>
+        <figure className={`video-card video-card--${video.id} ${video.orientation}`}>
+          <TiltedCard>
+            <GlareHover
+              className="video-card-glare"
+              width="100%"
+              height="auto"
+              background="transparent"
+              borderRadius="var(--gallery-video-radius)"
+              borderColor="transparent"
+              glareColor="#ffffff"
+              glareOpacity={0.3}
+              glareAngle={-30}
+              glareSize={300}
+              transitionDuration={800}
+              style={{ "--card-aspect-ratio": video.width && video.height ? `${video.width} / ${video.height}` : undefined }}
+            >
+              <button className="video-tile" type="button" onClick={() => onOpen(index)} aria-label={`播放${getDisplayTitle(video)}`}>
+                <AutoplayPreview video={video} />
+                <span className="tile-shade" aria-hidden="true" />
+              </button>
+            </GlareHover>
+          </TiltedCard>
           {!captionlessGalleryVideoIds.has(video.id) && (
             <figcaption className="video-caption">
-              <strong>{getDisplayTitle(video)}</strong>
+              <strong>
+                {video.id === "course-04" ? (
+                  <>
+                    <span>中国口述历史国际周入围作品</span><span className="course-04-title-phrase">《郝姐 上京赶集》</span>
+                  </>
+                ) : (
+                  <BlurText as="span" text={getDisplayTitle(video)} delay={150} animateBy="words" direction="top" />
+                )}
+              </strong>
             </figcaption>
           )}
         </figure>
+        </AnimatedListItem>
       ))}
     </div>
   );
@@ -531,10 +693,11 @@ function VideoGallery({ title, videos, description, onOpen }) {
 
 function LabeledGalleryRow({ className = "", title, videos, allVideos, collectionTitle, onOpen }) {
   const indexById = new Map(allVideos.map((video, index) => [video.id, index]));
+  const titleSplitMode = className.includes("labeled-gallery-row--reelshort") ? "word" : "char";
 
   return (
     <section className={`labeled-gallery-row ${className}`} aria-label={title}>
-      <header className="labeled-gallery-heading"><h3>{title}</h3></header>
+      <header className="labeled-gallery-heading"><h3><FoldText text={title} splitBy={titleSplitMode} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h3></header>
       <div className="labeled-gallery-media">
         <VideoGallery
           title={title}
@@ -558,44 +721,31 @@ function WorkSection({ work, videos, onOpen }) {
 
 const Works = memo(function Works({ manifest, onOpen }) {
   const categories = [
-    { id: "reelshort", title: "ReelShort 短剧", kicker: "01 / AIGC 视频制作", ids: ["ai"] },
-    {
-      id: "newtestament",
-      title: "AIGC 知识视频",
-      kicker: "02 / AI 全素材生成与视觉叙事",
-      ids: ["newtestament"]
-    },
+    { id: "aigc", title: "AIGC视频", kicker: "01 / AIGC 视频制作", ids: ["ai"] },
     {
       id: "academy",
       title: "纪录片学院奖片花",
       heading: "第十五届“光影纪年”中国纪录片学院奖片花",
-      kicker: "03 / 纪录片片花",
+      kicker: "02 / 纪录片片花",
       ids: ["academy"]
     },
-    { id: "xinhua", title: "新华社", kicker: "04 / 纪实与主题影像", subgroups: [
+    { id: "xinhua", title: "新华社", kicker: "03 / 纪实与主题影像", subgroups: [
       { title: "长纪录片", durationRule: "long", ids: ["xinhua", "tibet", "xiangxin"] },
       { title: "短视频", durationRule: "short", ids: ["yangsheng-xinhua", "xinhua-more", "xinhua-animation", "xinhua", "xiangxin", "tibet"] }
     ] },
-    { id: "yangshipin", title: "央视频", kicker: "05 / 风物与品牌影像", ids: ["guangxi"] },
-    { id: "xiaomi", title: "小米宣传片", kicker: "06 / 产品传播内容", ids: ["commercial"] },
-    { id: "student", title: "课程作业与纪录片", kicker: "07 / 校园创作与独立纪录片", ids: ["student"] }
+    {
+      id: "newtestament",
+      title: "AIGC 知识视频",
+      kicker: "04 / AI 全素材生成与视觉叙事",
+      ids: ["newtestament"]
+    },
+    { id: "reelshort", title: "ReelShort 短剧", kicker: "05 / AIGC 短剧制作", ids: ["ai"] },
+    { id: "yangshipin", title: "央视频", kicker: "06 / 风物与品牌影像", ids: ["guangxi"] },
+    { id: "xiaomi", title: "小米宣传片", kicker: "07 / 产品传播内容", ids: ["commercial"] },
+    { id: "student", title: "课程作业与纪录片", kicker: "08 / 校园创作与独立纪录片", ids: ["student"] }
   ];
 
-  const getWorkVideos = (id, durationRule) => {
-    const work = works.find((item) => item.id === id);
-    let videos = manifest[work.category] || [];
-    if (work.videoIds) videos = work.videoIds.map((videoId) => videos.find((video) => video.id === videoId)).filter(Boolean);
-    if (work.id === "commercial") {
-      const preferredOrder = ["xiaomi-05", "xiaomi-06", "xiaomi-07", "xiaomi-01", "xiaomi-02", "xiaomi-03", "xiaomi-04"];
-      videos = preferredOrder.map((videoId) => videos.find((video) => video.id === videoId)).filter(Boolean);
-    }
-    if (durationRule === "long") videos = videos.filter((video) => video.duration > 20 * 60);
-    if (durationRule === "short") videos = videos.filter((video) => video.duration <= 20 * 60);
-    return videos.map((video) => ({
-      ...video,
-      metaDescription: `${work.client} / ${work.role}`
-    }));
-  };
+  const getWorkVideos = (id, durationRule) => getWorkVideosForDisplay(manifest, id, durationRule);
 
   const renderGallery = (ids, durationRule, title) => {
     const videos = ids.flatMap((id) => getWorkVideos(id, durationRule));
@@ -603,27 +753,31 @@ const Works = memo(function Works({ manifest, onOpen }) {
     return <VideoGallery title={title} videos={videos} onOpen={(videoIndex) => onOpen(videos, videoIndex, title)} />;
   };
 
-  const renderReelshortRows = () => {
+  const renderAigcRow = () => {
     const videos = getWorkVideos("ai");
     return (
-      <div className="split-category-gallery">
-        <LabeledGalleryRow
-          className="labeled-gallery-row--aigc"
-          title="AIGC视频"
-          videos={videos.filter((video) => video.orientation !== "portrait")}
-          allVideos={videos}
-          collectionTitle="ReelShort 短剧"
-          onOpen={onOpen}
-        />
-        <LabeledGalleryRow
-          className="labeled-gallery-row--reelshort"
-          title="ReelShort 短剧"
-          videos={videos.filter((video) => video.orientation === "portrait")}
-          allVideos={videos}
-          collectionTitle="ReelShort 短剧"
-          onOpen={onOpen}
-        />
-      </div>
+      <LabeledGalleryRow
+        className="labeled-gallery-row--aigc"
+        title="AIGC视频"
+        videos={videos.filter((video) => video.orientation !== "portrait")}
+        allVideos={videos}
+        collectionTitle="AIGC视频"
+        onOpen={onOpen}
+      />
+    );
+  };
+
+  const renderReelshortRow = () => {
+    const videos = getWorkVideos("ai");
+    return (
+      <LabeledGalleryRow
+        className="labeled-gallery-row--reelshort"
+        title="ReelShort 短剧"
+        videos={videos.filter((video) => video.orientation === "portrait")}
+        allVideos={videos}
+        collectionTitle="ReelShort 短剧"
+        onOpen={onOpen}
+      />
     );
   };
 
@@ -635,7 +789,7 @@ const Works = memo(function Works({ manifest, onOpen }) {
       <>
         <section className="knowledge-video-row">
           <header className="category-heading">
-            <h3>{category.heading || category.title}</h3>
+            <h3><FoldText text={category.heading || category.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h3>
             {category.description && <p>{category.description}</p>}
           </header>
           <div className="category-content">
@@ -660,12 +814,12 @@ const Works = memo(function Works({ manifest, onOpen }) {
     <section className="editor-works" id="works">
       {categories.map((category) => (
         <section className={`chapter category-section category-section--${category.id}`} id={category.id} key={category.id}>
-          {category.id !== "reelshort" && category.id !== "newtestament" && <header className="category-heading">
-            <h3>{category.heading || category.title}</h3>
+          {category.id !== "aigc" && category.id !== "reelshort" && category.id !== "newtestament" && <header className="category-heading">
+            <h3><FoldText text={category.heading || category.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h3>
             {category.description && <p>{category.description}</p>}
           </header>}
           {category.id === "newtestament" ? renderKnowledgeRows(category) : <div className="category-content">
-            {category.id === "reelshort" ? renderReelshortRows() : category.subgroups ? category.subgroups.map((group) => <section className="subcategory" key={group.title}><h4>{group.title}</h4><div className="subcategory-gallery">{renderGallery(group.ids, group.durationRule, group.title)}</div></section>) : <div className="category-gallery">{renderGallery(category.ids, undefined, category.title)}</div>}
+            {category.id === "aigc" ? renderAigcRow() : category.id === "reelshort" ? renderReelshortRow() : category.subgroups ? category.subgroups.map((group) => <section className="subcategory" key={group.title}><h4><FoldText text={group.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h4><div className="subcategory-gallery">{renderGallery(group.ids, group.durationRule, group.title)}</div></section>) : <div className="category-gallery">{renderGallery(category.ids, undefined, category.title)}</div>}
           </div>}
         </section>
       ))}
@@ -673,61 +827,113 @@ const Works = memo(function Works({ manifest, onOpen }) {
   );
 });
 
-function VideoModal({ viewer, onClose, onChange }) {
-  const frameRef = useRef(null);
-  const videoRef = useRef(null);
+function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
   const [failed, setFailed] = useState(false);
   const [sourceIndex, setSourceIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [aspectRatio, setAspectRatio] = useState(16 / 9);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [isLikePending, setIsLikePending] = useState(false);
+  const [likeAnimationKey, setLikeAnimationKey] = useState(0);
+  const [likeStatus, setLikeStatus] = useState("");
+  const [shareStatus, setShareStatus] = useState("");
+  const [isContactAnimating, setIsContactAnimating] = useState(false);
+  const [switchDirection, setSwitchDirection] = useState("next");
   const { videos, index, collectionTitle } = viewer;
   const video = videos[index];
   const details = getVideoDetails(video);
-  const playbackSources = [`/api/video/${video.id}?mapping=2`, `/previews/${video.id}.mp4`];
+  const hidePlayerSummary = hidesPlayerSummary(video.id);
+  const hidePlayerTitle = hidesPlayerTitle(video.id);
+  const playbackSources = video.remoteStream
+    ? [video.src, `/previews/${video.id}.mp4`]
+    : [`/api/video/${video.id}?mapping=2`, `/previews/${video.id}.mp4`];
   const playbackSrc = playbackSources[sourceIndex];
+  const previousIndex = (index - 1 + videos.length) % videos.length;
+  const nextIndex = (index + 1) % videos.length;
+
+  const switchVideo = (targetIndex, direction) => {
+    if (isClosing || targetIndex === index) return;
+    setSwitchDirection(direction);
+    onChange(targetIndex);
+  };
 
   useEffect(() => {
     setFailed(false);
     setSourceIndex(0);
-    setIsPlaying(true);
-    setCurrentTime(0);
-    setDuration(0);
     setAspectRatio(video.orientation === "portrait" ? 9 / 16 : 16 / 9);
+    setIsLiked(false);
+    setLikeCount(0);
+    setIsLikePending(false);
+    setLikeAnimationKey(0);
+    setLikeStatus("");
+    setShareStatus("");
+    setIsContactAnimating(false);
   }, [video.id]);
 
-  const togglePlayback = () => {
-    const element = videoRef.current;
-    if (!element) return;
-    if (element.paused) element.play().catch(() => {});
-    else element.pause();
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/likes/${encodeURIComponent(video.id)}`)
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Unable to load likes")))
+      .then((data) => {
+        if (!cancelled) {
+          setLikeCount(data.count || 0);
+          setIsLiked(Boolean(data.liked));
+        }
+      })
+      .catch(() => {
+        if (import.meta.env.DEV && !cancelled) {
+          const localState = getLocalLikeState(video.id);
+          setLikeCount(localState.count);
+          setIsLiked(localState.liked);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [video.id]);
+
+  const shareProject = async () => {
+    const videoUrl = new URL(window.location.href);
+    videoUrl.searchParams.set("video", video.id);
+    videoUrl.hash = "";
+    try {
+      await navigator.clipboard.writeText(videoUrl.href);
+      setShareStatus("已复制");
+      window.setTimeout(() => setShareStatus(""), 1800);
+    } catch {
+      setShareStatus("复制失败");
+      window.setTimeout(() => setShareStatus(""), 1800);
+    }
   };
 
-  const changeVolume = (event) => {
-    const element = videoRef.current;
-    if (!element) return;
-    const nextVolume = Number(event.target.value);
-    element.volume = nextVolume;
-    element.muted = nextVolume === 0;
-    setVolume(nextVolume);
-    setIsMuted(nextVolume === 0);
-  };
-
-  const seek = (event) => {
-    const element = videoRef.current;
-    if (!element) return;
-    element.currentTime = Number(event.target.value);
-    setCurrentTime(element.currentTime);
-  };
-
-  const toggleFullscreen = () => {
-    const frame = frameRef.current;
-    if (!frame) return;
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    else frame.requestFullscreen?.();
+  const toggleLike = async () => {
+    if (isLikePending) return;
+    setLikeAnimationKey((current) => current + 1);
+    setIsLikePending(true);
+    try {
+      const response = await fetch(`/api/likes/${encodeURIComponent(video.id)}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: isLiked ? "unlike" : "like" })
+      });
+      if (!response.ok) throw new Error("Unable to update likes");
+      const data = await response.json();
+      setLikeCount(data.count || 0);
+      setIsLiked(Boolean(data.liked));
+    } catch {
+      if (import.meta.env.DEV) {
+        const nextState = {
+          liked: !isLiked,
+          count: Math.max(0, likeCount + (isLiked ? -1 : 1))
+        };
+        saveLocalLikeState(video.id, nextState);
+        setLikeCount(nextState.count);
+        setIsLiked(nextState.liked);
+        setLikeStatus("已在本地浏览器保存");
+      } else {
+        setLikeStatus("点赞服务暂不可用");
+      }
+    } finally {
+      setIsLikePending(false);
+    }
   };
 
   useEffect(() => {
@@ -735,8 +941,8 @@ function VideoModal({ viewer, onClose, onChange }) {
     document.body.style.overflow = "hidden";
     const handleKeyDown = (event) => {
       if (event.key === "Escape") onClose();
-      if (event.key === "ArrowLeft") onChange((index - 1 + videos.length) % videos.length);
-      if (event.key === "ArrowRight") onChange((index + 1) % videos.length);
+      if (event.key === "ArrowLeft") switchVideo((index - 1 + videos.length) % videos.length, "previous");
+      if (event.key === "ArrowRight") switchVideo((index + 1) % videos.length, "next");
       if (event.key === "Tab") {
         const focusable = [...document.querySelectorAll(".video-modal button, .video-modal video")];
         if (!focusable.length) return;
@@ -757,100 +963,93 @@ function VideoModal({ viewer, onClose, onChange }) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [index, onChange, onClose, videos]);
+  }, [index, isClosing, onClose, videos]);
 
-  return (
-    <div className="video-modal" role="dialog" aria-modal="true" aria-labelledby="video-modal-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+  useEffect(() => {
+    if (!isClosing) return undefined;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(onExited, prefersReducedMotion ? 0 : 420);
+    return () => window.clearTimeout(timer);
+  }, [isClosing, onExited]);
+
+  return createPortal((
+    <div className={`video-modal video-modal--${video.orientation}${isClosing ? " is-closing" : ""}`} role="dialog" aria-modal="true" {...(hidePlayerTitle ? { "aria-label": "视频播放器" } : { "aria-labelledby": "video-modal-title" })} onMouseDown={(event) => !isClosing && event.target === event.currentTarget && onClose()}>
       <div className="spatial-backdrop" style={{ backgroundImage: `url(${video.poster})` }} aria-hidden="true" />
+      <button className="spatial-close" type="button" onClick={onClose} aria-label="关闭播放器"><PlayerGlyph name="close" size={20} /></button>
+      {videos.length > 1 && <button className="player-switch player-switch--previous" type="button" onClick={() => switchVideo(previousIndex, "previous")} aria-label={`上一个视频：${getDisplayTitle(videos[previousIndex])}`}><ChevronLeft size={22} /></button>}
+      {videos.length > 1 && <button className="player-switch player-switch--next" type="button" onClick={() => switchVideo(nextIndex, "next")} aria-label={`下一个视频：${getDisplayTitle(videos[nextIndex])}`}><ChevronRight size={22} /></button>}
       <div className={`modal-shell ${video.orientation}`}>
-        <button className="spatial-close" type="button" onClick={onClose} aria-label="关闭播放器"><PlayerGlyph name="close" size={20} /></button>
         <div className="spatial-main">
           <div className={`player-stage ${video.orientation}`} style={{ "--video-ratio": aspectRatio }}>
-          <div className="video-frame" ref={frameRef}>
-            {failed ? (
-              <div className="player-error"><PlayerGlyph name="play" size={32} /><strong>暂时无法播放此视频</strong><span>请检查本地素材文件是否完整。</span></div>
-            ) : (
-              <video
-                key={playbackSrc}
-                ref={videoRef}
-                src={playbackSrc}
-                poster={video.poster}
-                autoPlay
-                playsInline
-                preload="metadata"
-                onClick={togglePlayback}
-                onLoadedMetadata={(event) => {
-                  const element = event.currentTarget;
-                  setDuration(element.duration || 0);
-                  if (element.videoWidth && element.videoHeight) setAspectRatio(element.videoWidth / element.videoHeight);
-                }}
-                onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                onVolumeChange={(event) => setIsMuted(event.currentTarget.muted || event.currentTarget.volume === 0)}
-                onError={() => {
-                  if (sourceIndex < playbackSources.length - 1) {
-                    setSourceIndex(sourceIndex + 1);
-                  } else {
-                    setFailed(true);
-                  }
-                }}
-              />
-            )}
-          </div>
+            <div key={video.id} className={`video-frame video-frame--switch-${switchDirection}`}>
+              {failed ? (
+                <div className="player-error"><PlayerGlyph name="play" size={32} /><strong>暂时无法播放此视频</strong><span>请检查本地素材文件是否完整。</span></div>
+              ) : (
+                <VideoAmbient
+                  key={playbackSrc}
+                  src={playbackSrc}
+                  poster={video.poster}
+                  autoPlay
+                  controls
+                  controlsList="nodownload noremoteplayback noplaybackrate"
+                  disablePictureInPicture
+                  disableRemotePlayback
+                  playsInline
+                  preload="metadata"
+                  blurAmount={70}
+                  intensity={0.9}
+                  onPointerUp={(event) => {
+                    const element = event.currentTarget;
+                    window.requestAnimationFrame(() => element.blur());
+                  }}
+                  onLoadedMetadata={(event) => {
+                    const element = event.currentTarget;
+                    if (element.videoWidth && element.videoHeight) setAspectRatio(element.videoWidth / element.videoHeight);
+                  }}
+                  onError={() => {
+                    if (sourceIndex < playbackSources.length - 1) {
+                      setSourceIndex(sourceIndex + 1);
+                    } else {
+                      setFailed(true);
+                    }
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
-        {video.orientation !== "portrait" && (
-          <aside className="spatial-rail">
-            <div className="spatial-intro">
-              {details.award && <p className="intro-award">{details.award}</p>}
-              <p className="intro-description">{details.description || video.metaDescription || "视频作品选集，记录从创意、素材到成片的影像实践。"}</p>
-              <dl className="intro-meta">
-                <div><dt>ROLE</dt><dd>{video.metaDescription || "导演 / 剪辑"}</dd></div>
-              </dl>
-              {details.links?.length > 0 && <div className="intro-links">{details.links.map((link) => <a href={link.href} key={link.href} target="_blank" rel="noreferrer">{link.label}<PlayerGlyph name="external" size={14} /></a>)}</div>}
+        <section key={`details-${video.id}`} className={`player-detail-panel player-detail-panel--switching${hidePlayerTitle ? " player-detail-panel--title-hidden" : ""}`} aria-label="作品信息">
+          {!hidePlayerTitle && <h2 id="video-modal-title">{getDisplayTitle(video)}</h2>}
+          <div className="player-detail-row">
+            <div className="player-creator">
+              <span className="player-avatar"><img src="/wa-logo.png" alt="" /></span>
+              <span><strong>吴义博</strong><small>{video.metaDescription || collectionTitle}</small></span>
+              <a className={`player-contact-button${isContactAnimating ? " is-animating" : ""}`} href="mailto:wu.yibo@foxmail.com" onClick={() => setIsContactAnimating(true)} onAnimationEnd={() => setIsContactAnimating(false)}>联系</a>
             </div>
-          </aside>
-        )}
-        {!failed && (
-          <div className="player-controls">
-            <div className="player-controls-row">
-              <button type="button" onClick={() => { if (videoRef.current) videoRef.current.currentTime -= 10; }} aria-label="后退十秒"><PlayerGlyph name="rewind" size={21} /></button>
-              <button type="button" onClick={togglePlayback} aria-label={isPlaying ? "暂停" : "播放"}>
-                {isPlaying ? <PlayerGlyph name="pause" size={21} /> : <PlayerGlyph name="play" size={21} />}
-              </button>
-              <button type="button" onClick={() => { if (videoRef.current) videoRef.current.currentTime += 10; }} aria-label="前进十秒"><PlayerGlyph name="forward" size={21} /></button>
-              <div className="now-playing">
-                <img src={video.poster} alt="" />
-                <span><strong id="video-modal-title">{getDisplayTitle(video)}</strong><small>{collectionTitle}</small></span>
-                <PlayerGlyph name="more" size={18} />
+            <div className="player-actions" aria-label="作品操作">
+              <div className="player-rating">
+                <button key={`like-${likeAnimationKey}`} type="button" className={`${isLiked ? "is-active" : ""}${likeAnimationKey > 0 ? " is-actioning" : ""}`} onClick={toggleLike} disabled={isLikePending} aria-label={`点赞数 ${likeCount}`}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10v11H3V10h4Zm2 11V9l4-7 1 1v5h5.4a1.6 1.6 0 0 1 1.55 2l-2.1 9.2A2.3 2.3 0 0 1 16.6 21H9Z" /></svg>
+                  {likeCount}
+                </button>
               </div>
-              <label className="volume-control" aria-label="音量调节">
-                {isMuted ? <PlayerGlyph name="muted" size={20} /> : <PlayerGlyph name="volume" size={20} />}
-                <input type="range" min="0" max="1" step="0.02" value={volume} onChange={changeVolume} aria-label="音量" />
-              </label>
-              <button type="button" onClick={toggleFullscreen} aria-label="全屏播放"><PlayerGlyph name="fullscreen" size={21} /></button>
-            </div>
-            <div className="player-timeline">
-              <span>{formatDuration(Math.floor(currentTime)) || "0:00"}</span>
-              <input
-                className="player-progress"
-                type="range"
-                min="0"
-                max={duration || 0}
-                step="0.1"
-                value={Math.min(currentTime, duration || 0)}
-                onChange={seek}
-                aria-label="视频进度"
-                style={{ "--player-progress": `${duration ? (currentTime / duration) * 100 : 0}%` }}
-              />
-              <span>{formatDuration(Math.floor(duration)) || "0:00"}</span>
+              {likeStatus && <span className="player-like-status" role="status">{likeStatus}</span>}
+              <button type="button" className={`player-share-button${shareStatus ? " is-feedback" : ""}`} onClick={shareProject}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.9a3.4 3.4 0 0 0 0-2.6l6.7-3.9A3 3 0 1 0 15 5c0 .23.03.46.08.67L8.35 9.6A3 3 0 1 0 8.35 14l6.73 3.93A3 3 0 1 0 18 16Z" /></svg><span>{shareStatus || "分享"}</span></button>
             </div>
           </div>
-        )}
+          {!hidePlayerSummary && <div className="player-project-summary">
+            <div className="player-project-meta" aria-label="视频信息">
+              <span>{formatVideoDuration(video.duration)}</span>
+              <span>{video.orientation === "portrait" ? "竖版影像" : "横版影像"}</span>
+              {details.award && <span>{details.award}</span>}
+            </div>
+            <p>{details.description || video.projectDescription || "视频作品选集，记录从创意、素材到成片的影像实践。"}</p>
+            {details.links?.length > 0 && <div className="player-project-links">{details.links.map((link) => <a href={link.href} key={link.href} target="_blank" rel="noreferrer">{link.label}</a>)}</div>}
+          </div>}
+        </section>
       </div>
     </div>
-  );
+  ), document.body);
 }
 
 function ResearchBlock() {
@@ -886,28 +1085,32 @@ function Experience() {
   );
 }
 
+function FooterDecrypt({ text, delay = 0 }) {
+  return <DecryptedText text={text} delay={delay} speed={58} encryptedClassName="footer-decrypt-encrypted" />;
+}
+
 function Footer() {
   return (
     <footer className="editor-footer" id="contact">
       <div className="footer-main">
         <div className="footer-brand">
-          <a href="#top" className="footer-logo" aria-label="返回顶部"><span>W</span> 吴义博</a>
-          <p>视频创作者与 AIGC 内容制作者，覆盖策划、拍摄、剪辑及从创意到交付的完整制作流程。</p>
+          <a href="#top" className="footer-logo" aria-label="返回顶部"><img className="footer-logo-image" src="/wa-logo.png" alt="WA Logo" /><FooterDecrypt text="吴义博" delay={180} /></a>
+          <p><FooterDecrypt text="视频创作者与 AIGC 内容制作者，覆盖策划、拍摄、剪辑及从创意到交付的完整制作流程。" delay={520} /></p>
         </div>
 
         <div className="footer-contact-grid">
-          <div><strong>Location</strong><span>中国 · 北京</span><span>支持线上办公</span></div>
-          <div><strong>Email Address</strong><a href="mailto:wu.yibo@foxmail.com">wu.yibo@foxmail.com</a></div>
-          <div><strong>Phone Number</strong><a href="tel:18800102979">18800102979</a><span>微信同号</span></div>
+          <div><strong><FooterDecrypt text="Location" delay={340} /></strong><span><FooterDecrypt text="中国 · 北京" delay={700} /></span><span><FooterDecrypt text="支持线上办公" delay={1040} /></span></div>
+          <div><strong><FooterDecrypt text="Email Address" delay={460} /></strong><a href="mailto:wu.yibo@foxmail.com"><FooterDecrypt text="wu.yibo@foxmail.com" delay={980} /></a></div>
+          <div><strong><FooterDecrypt text="Phone Number" delay={580} /></strong><a href="tel:18800102979"><FooterDecrypt text="18800102979" delay={1220} /></a><span><FooterDecrypt text="微信同号" delay={1580} /></span></div>
         </div>
       </div>
 
       <div className="footer-lower">
-        <span>© 2026 吴义博 · All rights reserved</span>
+        <span><FooterDecrypt text="© 2026 吴义博 · All rights reserved" delay={1280} /></span>
         <nav aria-label="页脚导航">
-          <a href="#works">作品</a>
-          <a href="#contact">联系</a>
-          <a href="#top">返回顶部</a>
+          <a href="#works"><FooterDecrypt text="作品" delay={1500} /></a>
+          <a href="#contact"><FooterDecrypt text="联系" delay={1640} /></a>
+          <a href="#top"><FooterDecrypt text="返回顶部" delay={1780} /></a>
         </nav>
       </div>
     </footer>
@@ -916,8 +1119,12 @@ function Footer() {
 
 function App() {
   const [manifest, setManifest] = useState({});
+  const [manifestReady, setManifestReady] = useState(false);
+  const [pageReady, setPageReady] = useState(false);
   const [viewer, setViewer] = useState(null);
+  const [isViewerClosing, setIsViewerClosing] = useState(false);
   const restoreFocusRef = useRef(null);
+  const portfolioVideos = useMemo(() => buildPortfolioVideoQueue(manifest), [manifest]);
 
   useEffect(() => {
     fetch("/media/manifest.json")
@@ -934,17 +1141,80 @@ function App() {
         );
         setManifest(resolvedManifest);
       })
-      .catch(() => setManifest({}));
+      .catch(() => setManifest({}))
+      .finally(() => setManifestReady(true));
   }, []);
 
-  const openViewer = useCallback((videos, index, collectionTitle) => {
-    if (!videos.length) return;
-    restoreFocusRef.current = document.activeElement;
-    setViewer({ videos, index, collectionTitle });
+  useEffect(() => {
+    if (!manifestReady || viewer) return;
+    const videoId = new URLSearchParams(window.location.search).get("video");
+    if (!videoId) return;
+    const index = portfolioVideos.findIndex((video) => video.id === videoId);
+    if (index >= 0) setViewer({ videos: portfolioVideos, index, collectionTitle: "全部视频作品" });
+  }, [manifestReady, portfolioVideos, viewer]);
+
+  useEffect(() => {
+    if (!viewer) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("video", viewer.videos[viewer.index].id);
+    url.hash = "";
+    window.history.replaceState(null, "", url);
+  }, [viewer]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const minimumDisplay = new Promise((resolve) => window.setTimeout(resolve, 700));
+    const windowLoaded = document.readyState === "complete"
+      ? Promise.resolve()
+      : new Promise((resolve) => window.addEventListener("load", resolve, { once: true }));
+    const fontsLoaded = document.fonts?.ready || Promise.resolve();
+
+    Promise.all([minimumDisplay, windowLoaded, fontsLoaded]).then(() => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          if (!cancelled) setPageReady(true);
+        });
+      });
+    });
+
+    const safetyTimer = window.setTimeout(() => {
+      if (!cancelled) {
+        setPageReady(true);
+        setManifestReady(true);
+      }
+    }, 6000);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(safetyTimer);
+    };
   }, []);
+
+  const openViewer = useCallback((videos, index) => {
+    if (!videos.length) return;
+    const selectedVideo = videos[index];
+    const globalIndex = portfolioVideos.findIndex((video) => video.id === selectedVideo.id);
+    const playbackQueue = globalIndex >= 0 ? portfolioVideos : videos;
+    restoreFocusRef.current = document.activeElement;
+    setIsViewerClosing(false);
+    setViewer({
+      videos: playbackQueue,
+      index: globalIndex >= 0 ? globalIndex : index,
+      collectionTitle: "全部视频作品"
+    });
+  }, [portfolioVideos]);
 
   const closeViewer = useCallback(() => {
+    if (!viewer || isViewerClosing) return;
+    setIsViewerClosing(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("video");
+    window.history.replaceState(null, "", url);
+  }, [isViewerClosing, viewer]);
+
+  const finishClosingViewer = useCallback(() => {
     setViewer(null);
+    setIsViewerClosing(false);
     window.requestAnimationFrame(() => restoreFocusRef.current?.focus());
   }, []);
 
@@ -954,13 +1224,15 @@ function App() {
 
   return (
     <>
+      <PageLoader visible={!pageReady || !manifestReady} />
       <Header />
       <main>
         <Hero />
+        <HeroDivider />
         <Works manifest={manifest} onOpen={openViewer} />
       </main>
       <Footer />
-      {viewer && <VideoModal viewer={viewer} onClose={closeViewer} onChange={changeVideo} />}
+      {viewer && <VideoModal viewer={viewer} isClosing={isViewerClosing} onClose={closeViewer} onChange={changeVideo} onExited={finishClosingViewer} />}
     </>
   );
 }
