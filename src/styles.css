@@ -4921,6 +4921,19 @@ video,
   pointer-events: none;
 }
 
+/* A transparent still from the original ProRes master keeps Safari's first
+   paint intact even while its H.264 fallback is buffering or blocked. */
+.hero-fallback-poster {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+}
+
 .hero-video-crossfade {
   position: absolute;
   inset: 0;
@@ -4942,6 +4955,7 @@ video,
    a black matte, which screen blending turns into the surrounding page tone. */
 .hero-video-crossfade .hero-background-video--safari-fallback {
   mix-blend-mode: screen;
+  z-index: 1;
 }
 
 .hero-text-loop {

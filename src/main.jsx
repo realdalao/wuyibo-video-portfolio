@@ -510,6 +510,14 @@ function CrossfadeHeroVideo() {
 
   return (
     <div className="hero-video-crossfade" aria-label="玻璃鱼缸与人像的动态艺术视觉">
+      {heroSource.fallback && (
+        <img
+          className="hero-fallback-poster"
+          src="/profile/hero-fishbowl-poster.png"
+          alt=""
+          aria-hidden="true"
+        />
+      )}
       {[0, 1].map((index) => (
         <video
           key={index}
@@ -517,8 +525,10 @@ function CrossfadeHeroVideo() {
           className={`hero-background-video ${heroSource.fallback ? "hero-background-video--safari-fallback" : ""} ${visibleIndex === index ? "is-visible" : ""}`}
           src={heroSource.src}
           autoPlay={index === 0}
+          defaultMuted
           muted
           playsInline
+          loop={false}
           preload="auto"
           onTimeUpdate={() => beginCrossfade(index)}
         />
