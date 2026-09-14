@@ -1,4 +1,4 @@
-import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
 import {
@@ -20,13 +20,11 @@ import PageLoader from "./components/ui/PageLoader";
 import VideoAmbient from "./components/ui/VideoAmbient";
 import DecryptedText from "./components/ui/DecryptedText";
 
-const TextLoop = lazy(() => import("./TextLoop"));
-
 const portfolioSource = "https://fcnapthanwru.feishu.cn/wiki/VNwkwSqvriUfmrklQQNc2mNanJE?from=from_copylink";
 const localLikeStorageKey = (videoId) => `portfolio_local_like:${videoId}`;
 const heroAlphaSources = {
   webm: "/profile/hero-fishbowl-alpha.webm",
-  mov: "/profile/hero-fishbowl-alpha.mov"
+  safari: "/profile/hero-fishbowl-alpha.mp4"
 };
 
 function getHeroAlphaSource() {
@@ -37,7 +35,7 @@ function getHeroAlphaSource() {
     && !/chrome|chromium|android|crios|fxios|edgios|opr/i.test(userAgent);
 
   // Safari and every iOS browser use the HEVC-with-Alpha delivery asset.
-  return isAppleMobile || isSafariDesktop ? heroAlphaSources.mov : heroAlphaSources.webm;
+  return isAppleMobile || isSafariDesktop ? heroAlphaSources.safari : heroAlphaSources.webm;
 }
 
 function getLocalLikeState(videoId) {
@@ -547,27 +545,14 @@ function Hero() {
 }
 
 function HeroDivider() {
+  const ribbonText = "VIDEO CREATOR · AIGC · DIRECTING · EDITING ✦ ";
   return (
-    <Suspense fallback={null}>
-      <TextLoop
-        className="hero-text-loop"
-        text="VIDEO CREATOR · AIGC · DIRECTING · EDITING"
-        shape="line"
-        speed={82}
-        direction="forward"
-        separator="✦"
-        curviness={0}
-        fontSize={34}
-        fontWeight={600}
-        letterSpacing={2}
-        uppercase
-        color="#ffffff"
-        ribbon
-        ribbonColor="#ad2831"
-        ribbonWidth={76}
-        pauseOnHover
-      />
-    </Suspense>
+    <div className="hero-text-loop" aria-label="VIDEO CREATOR · AIGC · DIRECTING · EDITING">
+      <div className="hero-ribbon-track" aria-hidden="true">
+        <span>{ribbonText.repeat(4)}</span>
+        <span>{ribbonText.repeat(4)}</span>
+      </div>
+    </div>
   );
 }
 
