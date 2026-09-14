@@ -419,10 +419,9 @@
     {
       "id": "newtestament-04",
       "title": "666到底是什么？《启示录》留下的千年谜题",
-      "src": "/api/bilibili/BV1sdt46oEkS",
+      "src": "/api/video/newtestament-04",
       "poster": "/media/newtestament/newtestament-04.jpg",
       "bilibiliId": "BV1sdt46oEkS",
-      "remoteStream": true,
       "width": 852,
       "height": 480,
       "duration": 244,
@@ -431,10 +430,9 @@
     {
       "id": "newtestament-05",
       "title": "耶稣讲过的这个“富二代”，到底有多败家？",
-      "src": "/api/bilibili/BV1noYH6JE2g",
+      "src": "/api/video/newtestament-05",
       "poster": "/media/newtestament/newtestament-05.jpg",
       "bilibiliId": "BV1noYH6JE2g",
-      "remoteStream": true,
       "width": 852,
       "height": 480,
       "duration": 246,

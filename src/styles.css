@@ -4837,12 +4837,12 @@ video,
   .video-modal .modal-shell > .player-controls { border-radius: 18px !important; }
 }
 
-/* Electric Gaze — fine dither, black field and cyan eye-line. */
+/* Let the page texture show through the transparent Hero video. */
 .editor-hero {
   isolation: isolate;
   overflow: hidden;
   clip-path: inset(0);
-  background: #010304 !important;
+  background: transparent !important;
   height: 520px;
   min-height: 0;
 }
@@ -4967,12 +4967,7 @@ video,
 }
 
 .editor-hero::after {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  content: "";
-  pointer-events: none;
-  background: linear-gradient(90deg, rgba(1, 8, 18, .42), transparent 47%, rgba(1, 8, 18, .34));
+  display: none;
 }
 
 .editor-hero .hero-intro,
@@ -5377,11 +5372,13 @@ video,
   backdrop-filter: none;
 }
 
-/* Center the moving ribbon in the breathing room between the Hero frame and
-   the first video row. Both sides use the same vertical rhythm. */
+/* Dock the moving ribbon to the Hero's lower edge so it conceals the seam. */
 .hero-text-loop {
   z-index: 5;
-  margin-top: var(--video-row-gap);
+  position: relative;
+  /* Overlap the stage enough to hide the animated subject's lower edge at
+     every responsive aspect ratio, including browser zoomed desktop views. */
+  margin-top: -10px;
 }
 
 .editor-works {
@@ -5442,7 +5439,7 @@ video,
 
 @media (max-width: 720px) {
   .hero-text-loop {
-    margin-top: var(--video-row-gap);
+    margin-top: -10px;
   }
 
   .editor-works {

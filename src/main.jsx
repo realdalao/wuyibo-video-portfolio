@@ -24,6 +24,21 @@ const TextLoop = lazy(() => import("./TextLoop"));
 
 const portfolioSource = "https://fcnapthanwru.feishu.cn/wiki/VNwkwSqvriUfmrklQQNc2mNanJE?from=from_copylink";
 const localLikeStorageKey = (videoId) => `portfolio_local_like:${videoId}`;
+const heroAlphaSources = {
+  webm: "/profile/hero-fishbowl-alpha.webm",
+  mov: "/profile/hero-fishbowl-alpha.mov"
+};
+
+function getHeroAlphaSource() {
+  const userAgent = navigator.userAgent;
+  const isAppleMobile = /iPad|iPhone|iPod/.test(userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isSafariDesktop = /safari/i.test(userAgent)
+    && !/chrome|chromium|android|crios|fxios|edgios|opr/i.test(userAgent);
+
+  // Safari and every iOS browser use the HEVC-with-Alpha delivery asset.
+  return isAppleMobile || isSafariDesktop ? heroAlphaSources.mov : heroAlphaSources.webm;
+}
 
 function getLocalLikeState(videoId) {
   try {
@@ -461,6 +476,7 @@ function CrossfadeHeroVideo() {
   const activeIndex = useRef(0);
   const transitioning = useRef(false);
   const [visibleIndex, setVisibleIndex] = useState(0);
+  const heroSource = getHeroAlphaSource();
 
   const beginCrossfade = useCallback((index) => {
     if (index !== activeIndex.current || transitioning.current) return;
@@ -501,7 +517,7 @@ function CrossfadeHeroVideo() {
           key={index}
           ref={(node) => { videoRefs.current[index] = node; }}
           className={`hero-background-video ${visibleIndex === index ? "is-visible" : ""}`}
-          src="/profile/hero-fishbowl.mp4"
+          src={heroSource}
           autoPlay={index === 0}
           muted
           playsInline
