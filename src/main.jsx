@@ -1131,7 +1131,7 @@ function Footer() {
 function App() {
   const [manifest, setManifest] = useState({});
   const [manifestReady, setManifestReady] = useState(true);
-  const [pageReady, setPageReady] = useState(true);
+  const [pageReady, setPageReady] = useState(false);
   const [viewer, setViewer] = useState(null);
   const [isViewerClosing, setIsViewerClosing] = useState(false);
   const restoreFocusRef = useRef(null);
@@ -1193,7 +1193,7 @@ function App() {
         setPageReady(true);
         setManifestReady(true);
       }
-    }, 6000);
+    }, 2400);
 
     return () => {
       cancelled = true;
@@ -1235,7 +1235,7 @@ function App() {
 
   return (
     <>
-      <PageLoader visible={!pageReady || !manifestReady} />
+      <PageLoader visible={!pageReady} />
       <Header />
       <main>
         <Hero />
