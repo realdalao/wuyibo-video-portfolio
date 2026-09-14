@@ -23,8 +23,8 @@ import DecryptedText from "./components/ui/DecryptedText";
 const portfolioSource = "https://fcnapthanwru.feishu.cn/wiki/VNwkwSqvriUfmrklQQNc2mNanJE?from=from_copylink";
 const localLikeStorageKey = (videoId) => `portfolio_local_like:${videoId}`;
 const heroAlphaSources = {
-  webm: { src: "/profile/hero-fishbowl-alpha.webm", fallback: false },
-  safari: { src: "/profile/hero-fishbowl.mp4", fallback: true }
+  webm: { src: "/profile/hero-fishbowl-alpha.webm?v=2", fallback: false },
+  safari: { src: "/profile/hero-fishbowl.mp4?v=2", fallback: true }
 };
 
 function getHeroAlphaSource() {
@@ -513,7 +513,7 @@ function CrossfadeHeroVideo() {
       {heroSource.fallback && (
         <img
           className="hero-fallback-poster"
-          src="/profile/hero-fishbowl-poster.png?v=2"
+          src="/profile/hero-fishbowl-poster.png?v=3"
           alt=""
           aria-hidden="true"
         />
