@@ -513,7 +513,7 @@ function CrossfadeHeroVideo() {
       {heroSource.fallback && (
         <img
           className="hero-fallback-poster"
-          src="/profile/hero-fishbowl-poster.png"
+          src="/profile/hero-fishbowl-poster.png?v=2"
           alt=""
           aria-hidden="true"
         />
