@@ -8,6 +8,7 @@ import {
   Grid2X2,
 } from "lucide-react";
 import "./styles.css";
+import "./gallery-grid.css";
 import "./experience.css";
 import "./footer.css";
 import FoldText from "./FoldText";
@@ -542,10 +543,10 @@ function Hero() {
     <section className="editor-hero" id="top">
       <CrossfadeHeroVideo />
       <div className="hero-intro hero-intro--video">
-        <h1 className="hero-depth-title"><span className="hero-static-title">VIDEO</span></h1>
+        <h1 className="hero-depth-title"><span className="hero-static-title">吴义博</span></h1>
       </div>
       <div className="hero-intro hero-intro--creator">
-        <h1 className="hero-depth-title"><span className="hero-static-title">CREATOR</span></h1>
+        <h1 className="hero-depth-title"><span className="hero-static-title">视频作品集</span></h1>
       </div>
       <div className="portrait-frame">
         <img src="/profile/hero-subway.jpg" alt="吴义博在地铁站台的肖像" decoding="async" />
@@ -732,7 +733,10 @@ function WorkSection({ work, videos, onOpen }) {
 
 const Works = memo(function Works({ manifest, onOpen }) {
   const categories = [
-    { id: "aigc", title: "AIGC视频", kicker: "01 / AIGC 视频制作", ids: ["ai"] },
+    { id: "xinhua", title: "新华社", kicker: "01 / 纪实与主题影像", subgroups: [
+      { title: "长纪录片", durationRule: "long", ids: ["xinhua", "tibet", "xiangxin"] },
+      { title: "短视频", durationRule: "short", ids: ["yangsheng-xinhua", "xinhua-more", "xinhua-animation", "xinhua", "xiangxin", "tibet"] }
+    ] },
     {
       id: "academy",
       title: "纪录片学院奖片花",
@@ -740,10 +744,7 @@ const Works = memo(function Works({ manifest, onOpen }) {
       kicker: "02 / 纪录片片花",
       ids: ["academy"]
     },
-    { id: "xinhua", title: "新华社", kicker: "03 / 纪实与主题影像", subgroups: [
-      { title: "长纪录片", durationRule: "long", ids: ["xinhua", "tibet", "xiangxin"] },
-      { title: "短视频", durationRule: "short", ids: ["yangsheng-xinhua", "xinhua-more", "xinhua-animation", "xinhua", "xiangxin", "tibet"] }
-    ] },
+    { id: "aigc", title: "AIGC视频", kicker: "03 / AIGC 视频制作", ids: ["ai"] },
     {
       id: "newtestament",
       title: "AIGC 知识视频",

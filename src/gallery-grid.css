@@ -1,0 +1,135 @@
+/* Compact, full-width galleries with headings above their media grids. */
+#works {
+  --video-row-gap: 24px;
+  --landscape-columns: 4;
+  --portrait-columns: 8;
+  padding-bottom: 48px;
+}
+
+#works .category-section,
+#works .labeled-gallery-row,
+#works .knowledge-video-row,
+#works .subcategory {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 16px;
+  align-items: start;
+}
+
+#works .category-content,
+#works .labeled-gallery-media,
+#works .subcategory-gallery {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+#works .category-section + .category-section {
+  margin-top: 36px;
+}
+
+#works .category-heading,
+#works .labeled-gallery-heading,
+#works .category-section .subcategory h4 {
+  position: static;
+  inset: auto;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left !important;
+}
+
+#works .category-heading h3,
+#works .labeled-gallery-heading h3 {
+  margin: 0;
+  max-width: none;
+  font-size: clamp(22px, 2.1vw, 30px);
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  text-wrap: pretty;
+}
+
+#works .subcategory {
+  gap: 12px;
+}
+
+#works .category-section .subcategory h4 {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+#works .video-group .video-gallery {
+  display: grid;
+  grid-template-columns: repeat(var(--landscape-columns), minmax(0, 1fr));
+  gap: 20px 16px;
+  row-gap: 20px !important;
+  align-items: start;
+}
+
+#works .video-group.portrait-group .video-gallery {
+  grid-template-columns: repeat(var(--portrait-columns), minmax(0, 1fr));
+}
+
+#works .video-card {
+  margin: 0;
+  min-width: 0;
+}
+
+/* The Tibet preview includes letterboxing in the source; crop it in the card only. */
+#works .video-card--tibet-01 .video-tile video,
+#works .video-card--documentary-trailers-01 .video-tile video {
+  object-position: center;
+  transform: scale(1.42);
+}
+
+#works .video-card--tibet-01 .video-tile:hover video,
+#works .video-card--tibet-01 .video-tile:focus-visible video,
+#works .video-card--documentary-trailers-01 .video-tile:hover video,
+#works .video-card--documentary-trailers-01 .video-tile:focus-visible video {
+  transform: scale(1.45);
+}
+
+#works .video-caption {
+  min-height: 0;
+  padding: 8px 0 0;
+}
+
+#works .video-caption strong {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (min-width: 721px) and (max-width: 1100px) {
+  #works {
+    --landscape-columns: 3;
+    --portrait-columns: 6;
+  }
+}
+
+@media (max-width: 720px) {
+  #works {
+    --landscape-columns: 2;
+    --portrait-columns: 3;
+    --video-row-gap: 20px;
+  }
+
+  #works .video-group .video-gallery {
+    column-gap: 10px;
+    row-gap: 16px !important;
+  }
+
+  #works .category-section + .category-section {
+    margin-top: 28px;
+  }
+
+  #works .video-caption strong {
+    font-size: 12px;
+  }
+}
+
+/* The existing 1.3x body zoom otherwise turns its 320px minimum into 416px. */
+@media (max-width: 420px) {
+  body {
+    min-width: 0;
+  }
+}

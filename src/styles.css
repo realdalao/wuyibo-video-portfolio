@@ -45,6 +45,14 @@
   font-display: block;
 }
 
+@font-face {
+  font-family: "HY Huang Ke Zhuang Li";
+  src: url("/fonts/HYHuangKeZhuangLiW.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   color: #111;
   background: #fff;
@@ -5185,10 +5193,10 @@ video,
 .editor-hero .hero-static-title {
   display: block;
   color: #bfc1c8;
-  font-family: var(--site-font);
+  font-family: "HY Huang Ke Zhuang Li", cursive;
   font-size: clamp(1.9rem, 4.2vw, 3.35rem);
-  font-weight: 400;
-  line-height: 0.72;
+  font-weight: 700;
+  line-height: 0.1;
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
@@ -5219,7 +5227,7 @@ video,
   left: clamp(28px, 5vw, 70px);
   right: auto;
   top: auto;
-  bottom: clamp(96px, 12vw, 150px);
+  bottom: clamp(66px, 9.2vw, 120px);
   transform: none;
 }
 
@@ -5227,7 +5235,7 @@ video,
   left: clamp(28px, 5vw, 70px);
   right: auto;
   top: auto;
-  bottom: clamp(38px, 5vw, 72px);
+  bottom: clamp(18px, 3.4vw, 52px);
   max-width: none;
   transform: none;
 }
@@ -5243,11 +5251,11 @@ video,
   }
 
   .editor-hero .hero-intro--video {
-    bottom: 68px;
+    bottom: 52px;
   }
 
   .editor-hero .hero-intro--creator {
-    bottom: 24px;
+    bottom: 12px;
   }
 }
 
@@ -5743,9 +5751,12 @@ body,
 }
 
 /* Left-hand video section rails use Source Han Sans without changing size. */
-.category-heading h3,
-.labeled-gallery-heading h3,
-.subcategory h4 {
+#root > main .category-heading h3,
+#root > main .category-heading h3 *,
+#root > main .labeled-gallery-heading h3,
+#root > main .labeled-gallery-heading h3 *,
+#root > main .subcategory h4,
+#root > main .subcategory h4 * {
   font-family: "Source Han Sans Heavy", "Source Han Sans CN", "Source Han Sans SC", "Noto Sans CJK SC", sans-serif !important;
   font-weight: 900 !important;
 }
