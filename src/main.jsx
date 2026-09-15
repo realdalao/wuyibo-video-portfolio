@@ -21,6 +21,7 @@ import VideoAmbient from "./components/ui/VideoAmbient";
 import DecryptedText from "./components/ui/DecryptedText";
 import WebThreads from "./components/ui/WebThreads";
 import DepthText from "./components/ui/DepthText";
+import MetallicPaint from "./components/ui/MetallicPaint";
 
 // Start fetching the WebGL background with the main page instead of waiting
 // for the first video modal to open. React.lazy still keeps it in a separate
@@ -1227,7 +1228,35 @@ function Footer() {
     <footer className="editor-footer" id="contact">
       <div className="footer-main">
         <div className="footer-brand">
-          <a href="#top" className="footer-logo" aria-label="返回顶部"><img className="footer-logo-image" src="/wa-logo.png" alt="WA Logo" /><FooterDecrypt text="吴义博" delay={180} /></a>
+          <a href="#top" className="footer-logo" aria-label="返回顶部">
+            <span className="footer-logo-metallic" aria-hidden="true">
+              <img className="footer-logo-image footer-logo-fallback" src="/wa-logo.png" alt="" />
+              <MetallicPaint
+                imageSrc="/wa-logo.png"
+                seed={42}
+                scale={4}
+                patternSharpness={1}
+                noiseScale={0.5}
+                speed={0.3}
+                liquid={0.75}
+                mouseAnimation={false}
+                brightness={2}
+                contrast={0.5}
+                refraction={0.01}
+                blur={0.015}
+                chromaticSpread={2}
+                fresnel={1}
+                angle={0}
+                waveAmplitude={1}
+                distortion={1}
+                contour={0.2}
+                lightColor="#ffffff"
+                darkColor="#000000"
+                tintColor="#feb3ff"
+              />
+            </span>
+            <FooterDecrypt text="吴义博" delay={180} />
+          </a>
           <p><FooterDecrypt text="视频创作者与 AIGC 内容制作者，覆盖策划、拍摄、剪辑及从创意到交付的完整制作流程。" delay={520} /></p>
         </div>
 

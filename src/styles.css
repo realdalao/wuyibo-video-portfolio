@@ -7012,3 +7012,13 @@ html[data-video-switch-layout="same-orientation"][data-video-switch-direction="p
   display: flex;
   line-height: inherit;
 }
+
+/* Match the closing section to the navigation's signature wine-red surface. */
+.editor-footer {
+  background: #640d14 !important;
+}
+
+/* Add depth below the moving Hero ribbon without changing its crisp top edge. */
+.hero-text-loop {
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
