@@ -1,0 +1,56 @@
+.depth-text {
+  display: inline-block;
+  perspective: var(--depth-text-perspective);
+  perspective-origin: 50% 48%;
+  isolation: isolate;
+}
+
+#root .editor-hero .hero-depth-text .depth-text__stage {
+  position: relative;
+  display: inline-grid;
+  place-items: start;
+  transform: var(--depth-text-transform) !important;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+#root .editor-hero .hero-depth-text .depth-text__layer,
+#root .editor-hero .hero-depth-text .depth-text__face {
+  grid-area: 1 / 1;
+  display: inline-block !important;
+  color: var(--depth-layer-color) !important;
+  font-family: "IdeaFonts DunDun 95", "MBanquet PPRC", cursive !important;
+  font-size: var(--depth-text-font-size) !important;
+  font-weight: var(--depth-text-font-weight) !important;
+  line-height: 0.86 !important;
+  letter-spacing: -0.035em !important;
+  white-space: pre-line;
+  text-align: left;
+  user-select: none;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  text-transform: none !important;
+}
+
+#root .editor-hero .hero-depth-text .depth-text__layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  filter: saturate(0.96) brightness(0.92) !important;
+  pointer-events: none;
+}
+
+#root .editor-hero .hero-depth-text .depth-text__face {
+  position: relative;
+  z-index: 1;
+  color: var(--depth-text-face-color) !important;
+  text-shadow: var(--depth-text-shadow) !important;
+  transform: translateZ(0.6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .editor-hero .hero-depth-text .depth-text__stage {
+    will-change: auto;
+  }
+}

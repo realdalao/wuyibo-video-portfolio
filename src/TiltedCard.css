@@ -38,7 +38,7 @@
 .tilted-card-figure:hover .video-tile img,
 .tilted-card-figure:focus-within .video-tile video,
 .tilted-card-figure:focus-within .video-tile img {
-  transform: scale(1.001) !important;
+  transform: scale(1.06) !important;
 }
 
 @media (hover: none), (prefers-reduced-motion: reduce) {

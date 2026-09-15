@@ -75,6 +75,29 @@
   min-width: 0;
 }
 
+#works .video-card .video-tile {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .28) !important;
+  transition: box-shadow 240ms ease;
+}
+
+#works .video-card:hover .video-tile,
+#works .video-card:focus-within .video-tile {
+  box-shadow: 0 18px 38px rgba(0, 0, 0, .38) !important;
+}
+
+/* Keep previews at their natural brightness while hovering. */
+#works .video-tile .tile-shade {
+  display: none;
+}
+
+#works .video-tile:hover video,
+#works .video-tile:hover img,
+#works .video-tile:focus-visible video,
+#works .video-tile:focus-visible img {
+  opacity: 1 !important;
+  filter: none;
+}
+
 /* The Tibet preview includes letterboxing in the source; crop it in the card only. */
 #works .video-card--tibet-01 .video-tile video,
 #works .video-card--documentary-trailers-01 .video-tile video {

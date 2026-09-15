@@ -1,5 +1,5 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal, flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import {
   ArrowRight,
@@ -15,11 +15,23 @@ import FoldText from "./FoldText";
 import BlurText from "./BlurText";
 import "./BlurText.css";
 import TiltedCard from "./TiltedCard";
-import GlareHover from "./GlareHover";
 import AnimatedListItem from "./AnimatedListItem";
 import PageLoader from "./components/ui/PageLoader";
 import VideoAmbient from "./components/ui/VideoAmbient";
 import DecryptedText from "./components/ui/DecryptedText";
+import WebThreads from "./components/ui/WebThreads";
+import DepthText from "./components/ui/DepthText";
+
+// Start fetching the WebGL background with the main page instead of waiting
+// for the first video modal to open. React.lazy still keeps it in a separate
+// chunk, while reusing this already-settled promise when the player mounts.
+const magicRingsModule = import("./components/ui/MagicRings");
+const MagicRings = lazy(() => magicRingsModule);
+const playerInfoBlurFrom = { filter: "blur(6px)", opacity: 0, y: 8 };
+const playerInfoBlurTo = [
+  { filter: "blur(3px)", opacity: 0.58, y: 3 },
+  { filter: "blur(0px)", opacity: 1, y: 0 }
+];
 
 const portfolioSource = "https://fcnapthanwru.feishu.cn/wiki/VNwkwSqvriUfmrklQQNc2mNanJE?from=from_copylink";
 const localLikeStorageKey = (videoId) => `portfolio_local_like:${videoId}`;
@@ -219,12 +231,15 @@ function galleryDisplayOrder(videos) {
 
 function buildPortfolioVideoQueue(manifest) {
   const knowledgeVideos = getWorkVideosForDisplay(manifest, "newtestament");
+  const aiVideos = getWorkVideosForDisplay(manifest, "ai");
   const pageSections = [
-    galleryDisplayOrder(getWorkVideosForDisplay(manifest, "ai")),
-    galleryDisplayOrder(getWorkVideosForDisplay(manifest, "academy")),
     galleryDisplayOrder(["xinhua", "tibet", "xiangxin"].flatMap((id) => getWorkVideosForDisplay(manifest, id, "long"))),
     galleryDisplayOrder(["yangsheng-xinhua", "xinhua-more", "xinhua-animation", "xinhua", "xiangxin", "tibet"].flatMap((id) => getWorkVideosForDisplay(manifest, id, "short"))),
-    galleryDisplayOrder(knowledgeVideos),
+    galleryDisplayOrder(getWorkVideosForDisplay(manifest, "academy")),
+    aiVideos.filter((video) => video.orientation !== "portrait"),
+    galleryDisplayOrder(knowledgeVideos.filter((video) => video.id !== "yiyan-nanjing")),
+    knowledgeVideos.filter((video) => video.id === "yiyan-nanjing"),
+    aiVideos.filter((video) => video.orientation === "portrait"),
     galleryDisplayOrder(getWorkVideosForDisplay(manifest, "guangxi")),
     galleryDisplayOrder(getWorkVideosForDisplay(manifest, "commercial")),
     galleryDisplayOrder(getWorkVideosForDisplay(manifest, "student"))
@@ -475,6 +490,7 @@ function CrossfadeHeroVideo() {
   const activeIndex = useRef(0);
   const transitioning = useRef(false);
   const [visibleIndex, setVisibleIndex] = useState(0);
+  const [crossfade, setCrossfade] = useState(null);
   const heroSource = getHeroAlphaSource();
 
   const beginCrossfade = useCallback((index) => {
@@ -489,9 +505,13 @@ function CrossfadeHeroVideo() {
     transitioning.current = true;
     next.currentTime = 0;
     const revealNextFrame = () => {
-      activeIndex.current = nextIndex;
-      setVisibleIndex(nextIndex);
+      // Keep both decoded clips on screen during the hand-off. A single
+      // visible index can briefly expose the layer below between opacity swaps.
+      setCrossfade({ from: index, to: nextIndex });
       window.setTimeout(() => {
+        activeIndex.current = nextIndex;
+        setVisibleIndex(nextIndex);
+        setCrossfade(null);
         current.pause();
         current.currentTime = 0;
         transitioning.current = false;
@@ -523,7 +543,7 @@ function CrossfadeHeroVideo() {
         <video
           key={index}
           ref={(node) => { videoRefs.current[index] = node; }}
-          className={`hero-background-video ${heroSource.fallback ? "hero-background-video--safari-fallback" : ""} ${visibleIndex === index ? "is-visible" : ""}`}
+          className={`hero-background-video ${heroSource.fallback ? "hero-background-video--safari-fallback" : ""} ${visibleIndex === index && crossfade?.from !== index ? "is-visible" : ""} ${crossfade?.from === index ? "is-fading-out" : ""} ${crossfade?.to === index ? "is-fading-in" : ""}`}
           src={heroSource.src}
           autoPlay={index === 0}
           defaultMuted
@@ -540,18 +560,28 @@ function CrossfadeHeroVideo() {
 
 function Hero() {
   return (
-    <section className="editor-hero" id="top">
-      <CrossfadeHeroVideo />
-      <div className="hero-intro hero-intro--video">
-        <h1 className="hero-depth-title"><span className="hero-static-title">吴义博</span></h1>
-      </div>
-      <div className="hero-intro hero-intro--creator">
-        <h1 className="hero-depth-title"><span className="hero-static-title">视频作品集</span></h1>
-      </div>
-      <div className="portrait-frame">
-        <img src="/profile/hero-subway.jpg" alt="吴义博在地铁站台的肖像" decoding="async" />
-      </div>
-    </section>
+    <div className="hero-thread-stage">
+      <WebThreads
+        className="hero-web-threads"
+        color1="#a855f7"
+        mouseInteraction={false}
+        pinchPosition={0.36}
+        position={0.58}
+        glow={0.02}
+        falloff={0.6}
+        thickness={0.2}
+        grain={false}
+      />
+      <section className="editor-hero" id="top">
+        <CrossfadeHeroVideo />
+        <div className="hero-intro hero-intro--depth">
+          <h1 className="hero-depth-title"><DepthText className="hero-depth-text" text={"吴义博\n视频作品集"} /></h1>
+        </div>
+        <div className="portrait-frame">
+          <img src="/profile/hero-subway.jpg" alt="吴义博在地铁站台的肖像" decoding="async" />
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -656,25 +686,16 @@ function VideoGallery({ title, videos, description, onOpen }) {
         <AnimatedListItem key={video.id} index={index} delay={Math.min(itemIndex * 0.055, 0.22)}>
         <figure className={`video-card video-card--${video.id} ${video.orientation}`}>
           <TiltedCard>
-            <GlareHover
-              className="video-card-glare"
-              width="100%"
-              height="auto"
-              background="transparent"
-              borderRadius="var(--gallery-video-radius)"
-              borderColor="transparent"
-              glareColor="#ffffff"
-              glareOpacity={0.3}
-              glareAngle={-30}
-              glareSize={300}
-              transitionDuration={800}
-              style={{ "--card-aspect-ratio": video.width && video.height ? `${video.width} / ${video.height}` : undefined }}
+            <button
+              className="video-tile"
+              type="button"
+              onClick={() => onOpen(index)}
+              aria-label={`播放${getDisplayTitle(video)}`}
+              style={{ aspectRatio: video.width && video.height ? `${video.width} / ${video.height}` : undefined }}
             >
-              <button className="video-tile" type="button" onClick={() => onOpen(index)} aria-label={`播放${getDisplayTitle(video)}`}>
-                <AutoplayPreview video={video} />
-                <span className="tile-shade" aria-hidden="true" />
-              </button>
-            </GlareHover>
+              <AutoplayPreview video={video} />
+              <span className="tile-shade" aria-hidden="true" />
+            </button>
           </TiltedCard>
           {!captionlessGalleryVideoIds.has(video.id) && (
             <figcaption className="video-caption">
@@ -842,7 +863,6 @@ const Works = memo(function Works({ manifest, onOpen }) {
 function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
   const [failed, setFailed] = useState(false);
   const [sourceIndex, setSourceIndex] = useState(0);
-  const [aspectRatio, setAspectRatio] = useState(16 / 9);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isLikePending, setIsLikePending] = useState(false);
@@ -850,7 +870,10 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
   const [likeStatus, setLikeStatus] = useState("");
   const [shareStatus, setShareStatus] = useState("");
   const [isContactAnimating, setIsContactAnimating] = useState(false);
-  const [switchDirection, setSwitchDirection] = useState("next");
+  const [orientationSwitchPhase, setOrientationSwitchPhase] = useState("idle");
+  const [isSameOrientationSwitching, setIsSameOrientationSwitching] = useState(false);
+  const switchTransitionRef = useRef(null);
+  const orientationSwitchTimersRef = useRef([]);
   const { videos, index, collectionTitle } = viewer;
   const video = videos[index];
   const details = getVideoDetails(video);
@@ -863,16 +886,76 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
   const previousIndex = (index - 1 + videos.length) % videos.length;
   const nextIndex = (index + 1) % videos.length;
 
-  const switchVideo = (targetIndex, direction) => {
-    if (isClosing || targetIndex === index) return;
-    setSwitchDirection(direction);
+  const prepareVideoSwitch = (targetIndex) => {
+    setFailed(false);
+    setSourceIndex(0);
     onChange(targetIndex);
   };
+
+  const switchVideo = (targetIndex, direction) => {
+    if (isClosing || targetIndex === index || switchTransitionRef.current) return;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const changesOrientation = videos[targetIndex].orientation !== video.orientation;
+
+    if (prefersReducedMotion) {
+      prepareVideoSwitch(targetIndex);
+      return;
+    }
+
+    if (changesOrientation) {
+      const transitionToken = {};
+      switchTransitionRef.current = transitionToken;
+      setOrientationSwitchPhase("out");
+
+      const changeTimer = window.setTimeout(() => {
+        if (switchTransitionRef.current !== transitionToken) return;
+        setOrientationSwitchPhase("in");
+        prepareVideoSwitch(targetIndex);
+
+        const finishTimer = window.setTimeout(() => {
+          if (switchTransitionRef.current !== transitionToken) return;
+          setOrientationSwitchPhase("idle");
+          switchTransitionRef.current = null;
+        }, 280);
+        orientationSwitchTimersRef.current.push(finishTimer);
+      }, 180);
+      orientationSwitchTimersRef.current.push(changeTimer);
+      return;
+    }
+
+    if (!document.startViewTransition) {
+      prepareVideoSwitch(targetIndex);
+      return;
+    }
+
+    document.documentElement.dataset.videoSwitchDirection = direction;
+    document.documentElement.dataset.videoSwitchLayout = "same-orientation";
+    document.querySelector(".video-modal .video-frame video")?.pause();
+    const transition = document.startViewTransition(() => {
+      flushSync(() => {
+        setIsSameOrientationSwitching(true);
+        prepareVideoSwitch(targetIndex);
+      });
+    });
+    switchTransitionRef.current = transition;
+    transition.finished.catch(() => {}).finally(() => {
+      delete document.documentElement.dataset.videoSwitchDirection;
+      delete document.documentElement.dataset.videoSwitchLayout;
+      setIsSameOrientationSwitching(false);
+      window.requestAnimationFrame(() => {
+        document.querySelector(".video-modal .video-frame video")?.play().catch(() => {});
+      });
+      if (switchTransitionRef.current === transition) switchTransitionRef.current = null;
+    });
+  };
+
+  useEffect(() => () => {
+    orientationSwitchTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+  }, []);
 
   useEffect(() => {
     setFailed(false);
     setSourceIndex(0);
-    setAspectRatio(video.orientation === "portrait" ? 9 / 16 : 16 / 9);
     setIsLiked(false);
     setLikeCount(0);
     setIsLikePending(false);
@@ -950,7 +1033,22 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const bodyPaddingRight = Number.parseFloat(window.getComputedStyle(document.body).paddingRight) || 0;
+
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${bodyPaddingRight + scrollbarWidth}px`;
+    }
     document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
+    };
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") onClose();
       if (event.key === "ArrowLeft") switchVideo((index - 1 + videos.length) % videos.length, "previous");
@@ -972,7 +1070,6 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [index, isClosing, onClose, videos]);
@@ -980,7 +1077,7 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
   useEffect(() => {
     if (!isClosing) return undefined;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(onExited, prefersReducedMotion ? 0 : 420);
+    const timer = window.setTimeout(onExited, prefersReducedMotion ? 0 : 460);
     return () => window.clearTimeout(timer);
   }, [isClosing, onExited]);
 
@@ -992,8 +1089,8 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
       {videos.length > 1 && <button className="player-switch player-switch--next" type="button" onClick={() => switchVideo(nextIndex, "next")} aria-label={`下一个视频：${getDisplayTitle(videos[nextIndex])}`}><ChevronRight size={22} /></button>}
       <div className={`modal-shell ${video.orientation}`}>
         <div className="spatial-main">
-          <div className={`player-stage ${video.orientation}`} style={{ "--video-ratio": aspectRatio }}>
-            <div key={video.id} className={`video-frame video-frame--switch-${switchDirection}`}>
+          <div className={`player-stage ${video.orientation}`} style={{ "--video-ratio": video.orientation === "portrait" ? 9 / 16 : 16 / 9 }}>
+            <div key={video.id} className={`video-frame${orientationSwitchPhase === "idle" ? "" : ` video-frame--orientation-${orientationSwitchPhase}`}`}>
               {failed ? (
                 <div className="player-error"><PlayerGlyph name="play" size={32} /><strong>暂时无法播放此视频</strong><span>请检查本地素材文件是否完整。</span></div>
               ) : (
@@ -1010,13 +1107,10 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
                   preload="metadata"
                   blurAmount={70}
                   intensity={0.9}
+                  active={!isSameOrientationSwitching}
                   onPointerUp={(event) => {
                     const element = event.currentTarget;
                     window.requestAnimationFrame(() => element.blur());
-                  }}
-                  onLoadedMetadata={(event) => {
-                    const element = event.currentTarget;
-                    if (element.videoWidth && element.videoHeight) setAspectRatio(element.videoWidth / element.videoHeight);
                   }}
                   onError={() => {
                     if (sourceIndex < playbackSources.length - 1) {
@@ -1030,12 +1124,31 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
             </div>
           </div>
         </div>
-        <section key={`details-${video.id}`} className={`player-detail-panel player-detail-panel--switching${hidePlayerTitle ? " player-detail-panel--title-hidden" : ""}`} aria-label="作品信息">
-          {!hidePlayerTitle && <h2 id="video-modal-title">{getDisplayTitle(video)}</h2>}
+        {/* Keep the information rail opaque while the player changes aspect ratio.
+            Fading this entire panel out/in leaves a visible blank flash between
+            portrait and landscape videos. */}
+        <section className={`player-detail-panel${hidePlayerTitle ? " player-detail-panel--title-hidden" : ""}`} aria-label="作品信息">
+          {!hidePlayerTitle && (
+            <h2 id="video-modal-title">
+              <BlurText
+                key={`player-title-${video.id}`}
+                as="span"
+                text={getDisplayTitle(video)}
+                animateBy="letters"
+                delay={18}
+                stepDuration={0.16}
+                animationFrom={playerInfoBlurFrom}
+                animationTo={playerInfoBlurTo}
+              />
+            </h2>
+          )}
           <div className="player-detail-row">
             <div className="player-creator">
               <span className="player-avatar"><img src="/wa-logo.png" alt="" /></span>
-              <span><strong>吴义博</strong><small>{video.metaDescription || collectionTitle}</small></span>
+              <span>
+                <BlurText key={`player-author-${video.id}`} as="strong" text="吴义博" animateBy="letters" delay={22} stepDuration={0.16} animationFrom={playerInfoBlurFrom} animationTo={playerInfoBlurTo} />
+                <BlurText key={`player-role-${video.id}`} as="small" text={video.metaDescription || collectionTitle} animateBy="letters" delay={12} stepDuration={0.16} animationFrom={playerInfoBlurFrom} animationTo={playerInfoBlurTo} />
+              </span>
               <a className={`player-contact-button${isContactAnimating ? " is-animating" : ""}`} href="mailto:wu.yibo@foxmail.com" onClick={() => setIsContactAnimating(true)} onAnimationEnd={() => setIsContactAnimating(false)}>联系</a>
             </div>
             <div className="player-actions" aria-label="作品操作">
@@ -1055,7 +1168,15 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
               <span>{video.orientation === "portrait" ? "竖版影像" : "横版影像"}</span>
               {details.award && <span>{details.award}</span>}
             </div>
-            <p>{details.description || video.projectDescription || "视频作品选集，记录从创意、素材到成片的影像实践。"}</p>
+            <BlurText
+              key={`player-description-${video.id}`}
+              text={details.description || video.projectDescription || "视频作品选集，记录从创意、素材到成片的影像实践。"}
+              animateBy="letters"
+              delay={7}
+              stepDuration={0.16}
+              animationFrom={playerInfoBlurFrom}
+              animationTo={playerInfoBlurTo}
+            />
             {details.links?.length > 0 && <div className="player-project-links">{details.links.map((link) => <a href={link.href} key={link.href} target="_blank" rel="noreferrer">{link.label}</a>)}</div>}
           </div>}
         </section>
@@ -1202,17 +1323,18 @@ function App() {
     };
   }, []);
 
-  const openViewer = useCallback((videos, index) => {
+  const openViewer = useCallback((videos, index, collectionTitle) => {
     if (!videos.length) return;
     const selectedVideo = videos[index];
     const globalIndex = portfolioVideos.findIndex((video) => video.id === selectedVideo.id);
-    const playbackQueue = globalIndex >= 0 ? portfolioVideos : videos;
     restoreFocusRef.current = document.activeElement;
     setIsViewerClosing(false);
     setViewer({
-      videos: playbackQueue,
+      // Once opened, the viewer moves continuously through the full portfolio.
+      // Keep the local collection only as a safe fallback for unmatched items.
+      videos: globalIndex >= 0 ? portfolioVideos : videos,
       index: globalIndex >= 0 ? globalIndex : index,
-      collectionTitle: "全部视频作品"
+      collectionTitle: globalIndex >= 0 ? "全部视频作品" : (collectionTitle || "全部视频作品")
     });
   }, [portfolioVideos]);
 
@@ -1244,6 +1366,11 @@ function App() {
         <Works manifest={manifest} onOpen={openViewer} />
       </main>
       <Footer />
+      <div className={`player-rings-layer${viewer ? " is-active" : ""}${isViewerClosing ? " is-closing" : ""}`} aria-hidden="true">
+        <Suspense fallback={null}>
+          <MagicRings active={Boolean(viewer)} />
+        </Suspense>
+      </div>
       {viewer && <VideoModal viewer={viewer} isClosing={isViewerClosing} onClose={closeViewer} onChange={changeVideo} onExited={finishClosingViewer} />}
     </>
   );

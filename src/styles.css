@@ -53,6 +53,22 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "MBanquet PPRC";
+  src: url("/fonts/MBanquetPPRC-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IdeaFonts DunDun 95";
+  src: url("/fonts/IdeaFonts-DunDun-95.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   color: #111;
   background: #fff;
@@ -4003,13 +4019,6 @@ video,
   background: var(--surface-hover);
 }
 
-.video-tile:hover img,
-.video-tile:hover video,
-.grid-work-gallery .video-tile:hover img,
-.grid-work-gallery .video-tile:hover video {
-  opacity: 0.82;
-}
-
 .gallery-empty {
   color: var(--muted);
   background: var(--surface);
@@ -4950,6 +4959,13 @@ video,
   clip-path: inset(0);
 }
 
+.editor-hero .hero-video-crossfade { z-index: 1; }
+
+.editor-hero .hero-video-crossfade,
+.editor-hero .hero-background-video {
+  background: transparent !important;
+}
+
 .hero-video-crossfade .hero-background-video {
   opacity: 0;
   transition: opacity 1000ms linear;
@@ -4957,6 +4973,16 @@ video,
 
 .hero-video-crossfade .hero-background-video.is-visible {
   opacity: 1;
+}
+
+.hero-video-crossfade .hero-background-video.is-fading-in {
+  z-index: 2;
+  opacity: 1;
+}
+
+.hero-video-crossfade .hero-background-video.is-fading-out {
+  z-index: 1;
+  opacity: 0;
 }
 
 /* Safari uses the original non-transparent H.264 Hero video. */
@@ -5192,8 +5218,8 @@ video,
 
 .editor-hero .hero-static-title {
   display: block;
-  color: #bfc1c8;
-  font-family: "HY Huang Ke Zhuang Li", cursive;
+  color: #fff !important;
+  font-family: "IdeaFonts DunDun 95", "MBanquet PPRC", "HY Huang Ke Zhuang Li", cursive;
   font-size: clamp(1.9rem, 4.2vw, 3.35rem);
   font-weight: 700;
   line-height: 0.1;
@@ -5244,7 +5270,23 @@ video,
   padding-right: 0;
 }
 
+/* Treat both title lines as one 3D object with a shared center pivot. */
+.editor-hero .hero-intro--depth {
+  left: clamp(28px, 5vw, 70px);
+  right: auto;
+  top: auto;
+  bottom: clamp(18px, 3.4vw, 52px);
+  max-width: none;
+  transform: none;
+}
+
+.editor-hero .hero-intro--depth .depth-text__layer,
+.editor-hero .hero-intro--depth .depth-text__face {
+  line-height: 1.18 !important;
+}
+
 @media (max-width: 720px) {
+  .editor-hero .hero-intro--depth,
   .editor-hero .hero-intro--video,
   .editor-hero .hero-intro--creator {
     left: 20px;
@@ -5255,6 +5297,10 @@ video,
   }
 
   .editor-hero .hero-intro--creator {
+    bottom: 12px;
+  }
+
+  .editor-hero .hero-intro--depth {
     bottom: 12px;
   }
 }
@@ -5650,12 +5696,44 @@ video,
 .video-card,
 .video-tile,
 .video-frame,
-.player-stage,
-.glare-hover,
-.video-card-glare {
+.player-stage {
   border: 0 !important;
   outline: 0 !important;
   box-shadow: none !important;
+}
+
+/* A restrained luminous weave adds motion to the Hero without competing with
+   the portrait film or the editorial title lockup. */
+.hero-thread-stage {
+  position: relative;
+  background: transparent;
+}
+
+.hero-thread-stage .editor-hero {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-thread-stage .hero-web-threads {
+  width: 100vw;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  z-index: 0;
+  opacity: 1;
+  mix-blend-mode: screen;
+}
+
+@media (max-width: 720px) {
+  .hero-thread-stage .hero-web-threads {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-thread-stage .hero-web-threads {
+    display: none;
+  }
 }
 
 /* Keep all typography flat and free of decorative effects. */
@@ -5810,37 +5888,54 @@ body,
   to { opacity: 1; }
 }
 
+.player-rings-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.player-rings-layer.is-active {
+  visibility: visible;
+  animation: player-viewer-enter 300ms ease-out both;
+}
+
+.player-rings-layer.is-closing {
+  animation: player-viewer-exit 280ms 140ms ease-in both;
+}
+
 @keyframes player-frame-enter {
-  from { opacity: 0; transform: translateY(18px) scale(.978); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes player-details-enter {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .video-modal {
-  animation: player-viewer-enter 220ms ease-out both;
+  animation: player-viewer-enter 300ms ease-out both;
 }
 
 .video-modal .spatial-main {
-  transform-origin: center top;
-  animation: player-frame-enter 440ms cubic-bezier(.16, 1, .3, 1) both;
+  animation: player-frame-enter 380ms 180ms ease-out both;
 }
 
-.video-modal .spatial-close {
-  animation: player-details-enter 280ms 100ms cubic-bezier(.16, 1, .3, 1) both;
-}
-
+.video-modal .spatial-close,
+.video-modal .player-switch,
 .video-modal .player-detail-panel {
-  animation: player-details-enter 360ms 120ms cubic-bezier(.16, 1, .3, 1) both;
+  animation: player-details-enter 320ms 220ms ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .player-rings-layer,
   .video-modal,
   .video-modal .spatial-main,
   .video-modal .spatial-close,
+  .video-modal .player-switch,
   .video-modal .player-detail-panel {
     animation: none;
   }
@@ -5854,33 +5949,36 @@ body,
 }
 
 @keyframes player-frame-exit {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(14px) scale(.982); }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @keyframes player-details-exit {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(9px); }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .video-modal.is-closing {
   pointer-events: none;
-  animation: player-viewer-exit 360ms ease-in both;
+  animation: player-viewer-exit 280ms 140ms ease-in both;
 }
 
 .video-modal.is-closing .spatial-main {
-  animation: player-frame-exit 360ms cubic-bezier(.4, 0, 1, 1) both;
+  animation: player-frame-exit 220ms ease-in both;
 }
 
 .video-modal.is-closing .spatial-close,
+.video-modal.is-closing .player-switch,
 .video-modal.is-closing .player-detail-panel {
-  animation: player-details-exit 240ms cubic-bezier(.4, 0, 1, 1) both;
+  animation: player-details-exit 180ms ease-in both;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .player-rings-layer.is-closing,
   .video-modal.is-closing,
   .video-modal.is-closing .spatial-main,
   .video-modal.is-closing .spatial-close,
+  .video-modal.is-closing .player-switch,
   .video-modal.is-closing .player-detail-panel {
     animation: none;
   }
@@ -6443,14 +6541,12 @@ body,
   overflow: hidden !important;
 }
 
-/* Center only when the complete player fits. Long descriptions must overflow
-   toward the scrollable bottom, never above the viewport's top edge. */
+/* Keep one stable top anchor. Re-centering a shell whose video or description
+   height changes causes visible vertical jumps during video switches. */
 @media (min-width: 761px) {
   .video-modal {
     display: flex !important;
-    /* Override the legacy !important place-items shorthand as well. */
     align-items: flex-start !important;
-    align-items: safe center !important;
     justify-content: center;
   }
 
@@ -6547,49 +6643,6 @@ body,
   .player-switch { transition: none; }
 }
 
-@keyframes player-video-slide-next {
-  from { opacity: 0; transform: translate3d(34px, 0, 0) scale(.988); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes player-video-slide-previous {
-  from { opacity: 0; transform: translate3d(-34px, 0, 0) scale(.988); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes player-information-change {
-  from { opacity: 0; transform: translateY(9px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.video-modal .video-frame--switch-next {
-  animation: player-video-slide-next 440ms cubic-bezier(.16, 1, .3, 1) both;
-}
-
-.video-modal .video-frame--switch-previous {
-  animation: player-video-slide-previous 440ms cubic-bezier(.16, 1, .3, 1) both;
-}
-
-.video-modal .player-detail-panel--switching {
-  animation: player-information-change 360ms 70ms cubic-bezier(.16, 1, .3, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .video-modal .video-frame--switch-next,
-  .video-modal .video-frame--switch-previous,
-  .video-modal .player-detail-panel--switching {
-    animation: none;
-  }
-}
-
-/* Give every gallery film a consistent floating edge without shadowing its
-   caption or changing the source aspect ratio. */
-.video-card .video-card-glare {
-  box-shadow:
-    0 18px 42px rgba(30, 2, 5, .34),
-    0 5px 14px rgba(30, 2, 5, .24) !important;
-}
-
 /* Shadows must be able to fade beyond every gallery wrapper. `paint`
    containment or a clipped row turns the soft blur into a hard divider. */
 .animated-video-list-item,
@@ -6615,4 +6668,347 @@ body,
 
 .video-card {
   contain: layout !important;
+}
+
+/* Final player layout guard. The film sits above its information while the
+   previous/next controls stay anchored to the two sides of the film. */
+.video-modal > .modal-shell {
+  position: relative;
+  z-index: 1;
+}
+
+/* Crossfade only the film. The surrounding shell and information may change
+   height without becoming part of the transition snapshot. */
+.video-modal .video-frame {
+  view-transition-name: video-player-card;
+}
+
+@keyframes player-video-exit-left {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to { opacity: 0; transform: translate3d(-96px, 0, 0); }
+}
+
+@keyframes player-video-enter-right {
+  from { opacity: 0; transform: translate3d(96px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes player-video-exit-right {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to { opacity: 0; transform: translate3d(96px, 0, 0); }
+}
+
+@keyframes player-video-enter-left {
+  from { opacity: 0; transform: translate3d(-96px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+::view-transition-group(video-player-card) {
+  animation: none;
+}
+
+::view-transition-image-pair(video-player-card) {
+  overflow: visible;
+}
+
+::view-transition-old(video-player-card),
+::view-transition-new(video-player-card) {
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  mix-blend-mode: normal;
+}
+
+html[data-video-switch-layout="same-orientation"][data-video-switch-direction="next"]::view-transition-old(video-player-card) {
+  z-index: 1;
+  animation: player-video-exit-left 360ms cubic-bezier(.4, 0, .2, 1) both;
+}
+
+html[data-video-switch-layout="same-orientation"][data-video-switch-direction="next"]::view-transition-new(video-player-card) {
+  z-index: 2;
+  animation: player-video-enter-right 360ms cubic-bezier(.4, 0, .2, 1) both;
+}
+
+html[data-video-switch-layout="same-orientation"][data-video-switch-direction="previous"]::view-transition-old(video-player-card) {
+  z-index: 1;
+  animation: player-video-exit-right 360ms cubic-bezier(.4, 0, .2, 1) both;
+}
+
+html[data-video-switch-layout="same-orientation"][data-video-switch-direction="previous"]::view-transition-new(video-player-card) {
+  z-index: 2;
+  animation: player-video-enter-left 360ms cubic-bezier(.4, 0, .2, 1) both;
+}
+
+@keyframes player-video-orientation-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes player-video-orientation-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.video-modal .video-frame--orientation-out {
+  animation: player-video-orientation-out 180ms ease-in both;
+}
+
+.video-modal .video-frame--orientation-in {
+  animation: player-video-orientation-in 280ms ease-out both;
+}
+
+.video-modal .player-detail-panel--orientation-out {
+  animation: player-video-orientation-out 160ms ease-in both;
+}
+
+.video-modal .player-detail-panel--orientation-in {
+  animation: player-video-orientation-in 240ms 40ms ease-out both;
+}
+
+/* Keep player actions in the viewport rather than the scrollable player flow. */
+.video-modal {
+  /* A backdrop filter creates a containing block, which makes fixed controls
+     scroll with this overlay on mobile. The solid modal surface needs no blur. */
+  background: transparent !important;
+  backdrop-filter: none;
+}
+
+/* The full-screen ring canvas is the only player-page background. */
+.video-modal::after {
+  background: none !important;
+}
+
+.video-modal > .spatial-close {
+  position: fixed !important;
+  right: 56px !important;
+  z-index: 20;
+  border: 0;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, .58),
+    0 3px 8px rgba(0, 0, 0, .42);
+}
+
+/* Header strip color requested for the portfolio navigation. */
+.site-header {
+  background: #640d14 !important;
+  border-bottom: 0 !important;
+}
+
+/* Keep header actions as text links rather than black button blocks. */
+.site-header .header-actions .soft-button,
+.site-header .header-actions .dark-button,
+.site-header .header-actions .soft-button:hover,
+.site-header .header-actions .dark-button:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.video-modal > .modal-shell,
+.video-modal > .modal-shell.landscape,
+.video-modal > .modal-shell.portrait {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  gap: clamp(16px, 2vh, 24px) !important;
+  align-items: start !important;
+  width: min(800px, calc(100% - 180px)) !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.video-modal > .modal-shell .spatial-main {
+  position: relative;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  min-width: 0;
+  width: 100%;
+  overflow: visible !important;
+}
+
+.video-modal > .modal-shell .player-detail-panel {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  align-self: start !important;
+  min-width: 0;
+  width: 100% !important;
+  margin: 0 !important;
+  padding-top: 0 !important;
+}
+
+.video-modal > .modal-shell.landscape .player-stage {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Landscape films need a little more clearance from the top of the player.
+   Apply it to their stage only so the portrait rail remains anchored. */
+.video-modal > .modal-shell.landscape .spatial-main {
+  margin-top: clamp(16px, 2vh, 24px);
+}
+
+.video-modal > .modal-shell.portrait .spatial-main {
+  display: grid;
+  justify-items: center;
+}
+
+.video-modal > .modal-shell.portrait .player-stage {
+  width: min(340px, 100%) !important;
+}
+
+.video-modal > .player-switch {
+  position: fixed !important;
+  top: calc(50% + 10px) !important;
+  transform: translateY(-50%) !important;
+  z-index: 20;
+  border: 0;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, .58),
+    0 3px 8px rgba(0, 0, 0, .42);
+}
+
+.video-modal > .player-switch:hover {
+  border-color: transparent;
+}
+
+.video-modal > .player-switch--previous {
+  left: 56px !important;
+  right: auto !important;
+}
+
+.video-modal > .player-switch--next {
+  right: 56px !important;
+  left: auto !important;
+}
+
+@media (max-width: 900px) {
+  .video-modal > .modal-shell,
+  .video-modal > .modal-shell.landscape,
+  .video-modal > .modal-shell.portrait {
+    width: min(100%, calc(100vw - 64px)) !important;
+  }
+
+  .video-modal > .player-switch--previous {
+    left: 32px !important;
+  }
+
+  .video-modal > :is(.spatial-close, .player-switch--next) {
+    right: 32px !important;
+  }
+}
+
+/* Portrait player: keep the shell, film, and metadata on one 9:16 rail.
+   These final overrides prevent the generic 800px shell from introducing
+   side bars and spreading the information across the viewport. */
+.video-modal > .modal-shell.portrait {
+  width: min(340px, 30.375dvh, calc(100vw - 180px)) !important;
+  gap: 14px !important;
+}
+
+.video-modal > .modal-shell.portrait .spatial-main,
+.video-modal > .modal-shell.portrait .player-stage,
+.video-modal > .modal-shell.portrait .video-frame,
+.video-modal > .modal-shell.portrait .video-ambient {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 9 / 16 !important;
+}
+
+.video-modal > .modal-shell.portrait .video-frame,
+.video-modal > .modal-shell.portrait .video-ambient {
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.video-modal > .modal-shell.portrait .video-ambient__media {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  object-fit: cover !important;
+  background: transparent !important;
+}
+
+.video-modal > .modal-shell.portrait .player-detail-panel {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.video-modal > .modal-shell.portrait .player-detail-row {
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 900px) {
+  .video-modal > .modal-shell.portrait {
+    width: min(340px, 30.375dvh, calc(100vw - 64px)) !important;
+  }
+}
+
+/* Stable portrait contact action. Override the legacy pill sizing so the
+   narrow information rail cannot squeeze it into a circle or two lines. */
+.video-modal > .modal-shell.portrait .player-creator {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+}
+
+.video-modal > .modal-shell.portrait .player-contact-button,
+.video-modal > .modal-shell.portrait .player-contact-button:hover,
+.video-modal > .modal-shell.portrait .player-contact-button.is-animating {
+  display: inline-flex !important;
+  width: auto !important;
+  min-width: 28px !important;
+  max-width: none !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  flex: 0 0 auto !important;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 0 2px !important;
+  border-radius: 0 !important;
+  color: rgba(255, 255, 255, .82) !important;
+  background: transparent !important;
+  box-shadow: inset 0 -1px rgba(255, 255, 255, .4) !important;
+  font-size: 12px !important;
+  line-height: 30px !important;
+  white-space: nowrap !important;
+  transform: none !important;
+}
+
+.video-modal > .modal-shell.portrait .player-contact-button:hover {
+  color: #fff !important;
+  box-shadow: inset 0 -1px #fff !important;
+}
+
+.video-modal > .modal-shell.portrait .player-contact-button.is-animating {
+  animation: none !important;
+  opacity: .62;
+}
+
+/* Give the desktop player more breathing room above the film. */
+@media (min-width: 901px) {
+  .video-modal {
+    padding-top: clamp(64px, 7vh, 84px) !important;
+  }
+}
+
+/* BlurText inside player metadata must retain inline glyph flow despite older
+   creator-layout rules that target every nested span. */
+.video-modal .player-detail-panel .blur-text {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.video-modal .player-detail-panel .blur-text-segment {
+  display: inline-block;
+}
+
+.video-modal .player-project-summary > .blur-text {
+  display: flex;
+  line-height: inherit;
 }

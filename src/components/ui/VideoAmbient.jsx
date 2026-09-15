@@ -9,7 +9,7 @@ const CANVAS_HEIGHT = 36;
  * Keeping the canvas small makes the blurred colour field inexpensive to paint.
  */
 const VideoAmbient = forwardRef(function VideoAmbient(
-  { className = "", blurAmount = 56, intensity = 0.78, ...videoProps },
+  { className = "", blurAmount = 56, intensity = 0.78, active = true, ...videoProps },
   forwardedRef,
 ) {
   const videoRef = useRef(null);
@@ -21,7 +21,7 @@ const VideoAmbient = forwardRef(function VideoAmbient(
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d", { alpha: false });
-    if (!video || !canvas || !context) return undefined;
+    if (!video || !canvas || !context || !active) return undefined;
 
     let frame = 0;
     const paint = () => {
@@ -37,7 +37,7 @@ const VideoAmbient = forwardRef(function VideoAmbient(
 
     frame = requestAnimationFrame(paint);
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [active]);
 
   return (
     <div className={`video-ambient ${className}`}>
