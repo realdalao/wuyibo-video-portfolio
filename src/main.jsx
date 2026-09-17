@@ -671,7 +671,7 @@ const AutoplayPreview = memo(function AutoplayPreview({ video }) {
   );
 });
 
-function VideoGallery({ title, videos, description, onOpen }) {
+function VideoGallery({ title, videos, description, onOpen, hideCaptions = false }) {
   if (!videos.length) return <div className="gallery-empty">视频封面正在准备中</div>;
 
   const landscapeVideos = [];
@@ -683,22 +683,32 @@ function VideoGallery({ title, videos, description, onOpen }) {
 
   const renderVideos = (items) => (
     <div className="video-gallery">
-      {items.map(({ video, index }, itemIndex) => (
-        <AnimatedListItem key={video.id} index={index} delay={Math.min(itemIndex * 0.055, 0.22)}>
-        <figure className={`video-card video-card--${video.id} ${video.orientation}`}>
-          <TiltedCard>
+      {items.map(({ video, index }, itemIndex) => {
+        const mediaRatio = video.orientation === "portrait"
+          ? (video.width && video.height ? `${video.width} / ${video.height}` : "9 / 16")
+          : "16 / 9";
+        const mediaRatioValue = video.orientation === "portrait" && video.width && video.height
+          ? video.width / video.height
+          : video.orientation === "portrait" ? 9 / 16 : 16 / 9;
+
+        return (
+        <AnimatedListItem key={video.id} index={index} delay={Math.min(itemIndex * 0.055, 0.22)} style={{
+          "--card-ratio": mediaRatio,
+          "--card-ratio-value": mediaRatioValue,
+        }}>
+        <TiltedCard rotateAmplitude={12} scaleOnHover={1.03}>
+        <figure className={`video-card video-card--${video.id} ${video.orientation} ${hideCaptions || captionlessGalleryVideoIds.has(video.id) ? "video-card--untitled" : "video-card--titled"}`}>
             <button
               className="video-tile"
               type="button"
               onClick={() => onOpen(index)}
               aria-label={`播放${getDisplayTitle(video)}`}
-              style={{ aspectRatio: video.width && video.height ? `${video.width} / ${video.height}` : undefined }}
+              style={{ aspectRatio: mediaRatio }}
             >
               <AutoplayPreview video={video} />
               <span className="tile-shade" aria-hidden="true" />
             </button>
-          </TiltedCard>
-          {!captionlessGalleryVideoIds.has(video.id) && (
+          {!hideCaptions && !captionlessGalleryVideoIds.has(video.id) && (
             <figcaption className="video-caption">
               <strong>
                 {video.id === "course-04" ? (
@@ -712,8 +722,10 @@ function VideoGallery({ title, videos, description, onOpen }) {
             </figcaption>
           )}
         </figure>
+        </TiltedCard>
         </AnimatedListItem>
-      ))}
+        );
+      })}
     </div>
   );
 
@@ -736,6 +748,7 @@ function LabeledGalleryRow({ className = "", title, videos, allVideos, collectio
         <VideoGallery
           title={title}
           videos={videos}
+          hideCaptions={className.includes("labeled-gallery-row--reelshort")}
           onOpen={(localIndex) => onOpen(allVideos, indexById.get(videos[localIndex].id), collectionTitle)}
         />
       </div>
@@ -853,7 +866,7 @@ const Works = memo(function Works({ manifest, onOpen }) {
             {category.description && <p>{category.description}</p>}
           </header>}
           {category.id === "newtestament" ? renderKnowledgeRows(category) : <div className="category-content">
-            {category.id === "aigc" ? renderAigcRow() : category.id === "reelshort" ? renderReelshortRow() : category.subgroups ? category.subgroups.map((group) => <section className="subcategory" key={group.title}><h4><FoldText text={group.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h4><div className="subcategory-gallery">{renderGallery(group.ids, group.durationRule, group.title)}</div></section>) : <div className="category-gallery">{renderGallery(category.ids, undefined, category.title)}</div>}
+            {category.id === "aigc" ? renderAigcRow() : category.id === "reelshort" ? renderReelshortRow() : category.subgroups ? category.subgroups.map((group) => <section className={`subcategory subcategory--${group.durationRule || "all"}`} key={group.title}><h4><FoldText text={group.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h4><div className="subcategory-gallery">{renderGallery(group.ids, group.durationRule, group.title)}</div></section>) : <div className="category-gallery">{renderGallery(category.ids, undefined, category.title)}</div>}
           </div>}
         </section>
       ))}

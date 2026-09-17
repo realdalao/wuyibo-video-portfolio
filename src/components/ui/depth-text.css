@@ -20,7 +20,7 @@
   grid-area: 1 / 1;
   display: inline-block !important;
   color: var(--depth-layer-color) !important;
-  font-family: "IdeaFonts DunDun 95", "MBanquet PPRC", cursive !important;
+  font-family: "IdeaFonts DunDun 95", cursive !important;
   font-size: var(--depth-text-font-size) !important;
   font-weight: var(--depth-text-font-weight) !important;
   line-height: 0.86 !important;

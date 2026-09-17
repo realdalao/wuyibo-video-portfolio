@@ -2,7 +2,7 @@ import { memo, useRef } from "react";
 import { motion, useMotionValue, useSpring } from "motion/react";
 import "./TiltedCard.css";
 
-const springValues = { damping: 30, stiffness: 100, mass: 2 };
+const springValues = { damping: 22, stiffness: 180, mass: 0.7 };
 
 function TiltedCard({ children, className = "", scaleOnHover = 1, rotateAmplitude = 14 }) {
   const ref = useRef(null);

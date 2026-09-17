@@ -46,18 +46,10 @@
 }
 
 @font-face {
-  font-family: "HY Huang Ke Zhuang Li";
-  src: url("/fonts/HYHuangKeZhuangLiW.ttf") format("truetype");
+  font-family: "Source Han Sans Regular";
+  src: url("/fonts/SourceHanSansCN-Regular.otf") format("opentype");
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "MBanquet PPRC";
-  src: url("/fonts/MBanquetPPRC-Medium.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 500;
   font-display: swap;
 }
 
@@ -5219,7 +5211,7 @@ video,
 .editor-hero .hero-static-title {
   display: block;
   color: #fff !important;
-  font-family: "IdeaFonts DunDun 95", "MBanquet PPRC", "HY Huang Ke Zhuang Li", cursive;
+  font-family: "IdeaFonts DunDun 95", cursive;
   font-size: clamp(1.9rem, 4.2vw, 3.35rem);
   font-weight: 700;
   line-height: 0.1;
@@ -5803,10 +5795,12 @@ body,
   display: none !important;
 }
 
-/* Keep every title beneath a video in the Alibaba PuHuiTi family. */
+/* Card titles use the supplied Source Han Sans Regular face; keep every animated
+   glyph on the same weight so titles do not become bold mid-word. */
 .video-caption,
 .video-caption * {
-  font-family: "Alibaba PuHuiTi 2.0 Bold", sans-serif !important;
+  font-family: "Source Han Sans Regular", sans-serif !important;
+  font-synthesis: none !important;
 }
 
 /* Footer English follows the requested lowercase treatment. */
@@ -7021,4 +7015,107 @@ html[data-video-switch-layout="same-orientation"][data-video-switch-direction="p
 /* Add depth below the moving Hero ribbon without changing its crisp top edge. */
 .hero-text-loop {
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+
+/* Lift every gallery card as a single framed object, including its caption. */
+#works .video-card {
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38) !important;
+  transition: box-shadow 240ms ease;
+}
+
+#works .video-card:hover,
+#works .video-card:focus-within {
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.48) !important;
+}
+
+/* Keep the long oral-history title within the shared card caption height. */
+#works .video-card--course-04 .video-caption strong {
+  display: block;
+  overflow: hidden;
+  font-size: clamp(6px, 3.6cqw, 12px);
+  white-space: normal;
+  text-wrap: balance;
+}
+
+/* Gallery thumbnails use a muted, rounded frame like the supplied reference. */
+#works .video-tile {
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, .28) !important;
+  border-radius: 12px !important;
+  background-clip: padding-box;
+  box-sizing: border-box;
+}
+
+#works .video-tile > :is(img, video),
+#works .video-tile .tile-shade {
+  border-radius: inherit !important;
+}
+
+@media (max-width: 720px) {
+  #works .video-tile {
+    border-radius: 9px !important;
+  }
+}
+
+/* Keep the interactive thumbnail above the caption in the card's stacking
+   order. The layout remains thumbnail first, caption second. */
+#works .video-card {
+  position: relative;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #080d0e;
+  box-sizing: border-box;
+}
+
+#works .video-card .video-tile {
+  position: relative;
+  z-index: 1;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 3.846154cqw !important;
+  box-sizing: border-box;
+}
+
+/* Draw the hairline above the moving image so the preview cannot cover it. */
+#works .video-card .video-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 0.5px solid rgb(50, 50, 50) !important;
+  border-radius: inherit;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* Reset the media layers themselves, not just the thumbnail wrapper. */
+#works .video-card .video-tile > :is(video, img),
+#works .video-card .video-tile .tile-shade,
+#works .video-card .video-tile::after {
+  border-radius: inherit !important;
+}
+
+/* Some previews carry legacy clipping on nested media wrappers. */
+#works .video-card .video-tile {
+  clip-path: none !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+
+#works .video-card .video-tile * {
+  border-radius: inherit !important;
+  clip-path: none !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+
+#works .video-card .video-caption {
+  position: absolute;
+  z-index: 1;
+}
+
+@media (max-width: 720px) {
+  #works .video-card { border-radius: 0 !important; }
+  #works .video-card .video-tile { border-radius: 3.846154cqw !important; }
 }

@@ -1,8 +1,7 @@
 /* Compact, full-width galleries with headings above their media grids. */
 #works {
   --video-row-gap: 24px;
-  --landscape-columns: 4;
-  --portrait-columns: 8;
+  --gallery-card-height: clamp(210px, 20vw, 280px);
   padding-bottom: 48px;
 }
 
@@ -49,6 +48,20 @@
   text-wrap: pretty;
 }
 
+/* Give the left-rail category labels the same crisp, poster-style outline as
+   the supplied reference, without affecting the video captions. FoldText
+   renders each glyph in its own element, so the treatment is inherited there. */
+#works .category-heading h3,
+#works .category-heading h3 *,
+#works .labeled-gallery-heading h3,
+#works .labeled-gallery-heading h3 *,
+#works .category-section .subcategory h4,
+#works .category-section .subcategory h4 * {
+  -webkit-text-stroke: 1px #190306 !important;
+  paint-order: stroke fill;
+  text-shadow: none !important;
+}
+
 #works .subcategory {
   gap: 12px;
 }
@@ -59,30 +72,116 @@
 }
 
 #works .video-group .video-gallery {
-  display: grid;
-  grid-template-columns: repeat(var(--landscape-columns), minmax(0, 1fr));
-  gap: 20px 16px;
-  row-gap: 20px !important;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 16px !important;
   align-items: start;
 }
 
-#works .video-group.portrait-group .video-gallery {
-  grid-template-columns: repeat(var(--portrait-columns), minmax(0, 1fr));
+#works .video-group.landscape-group .video-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+#works .video-group.portrait-group .video-gallery {
+  justify-content: flex-start;
+}
+
+#works .video-group.portrait-group .animated-video-list-item {
+  --card-height: clamp(165px, 15vw, 210px);
+}
+
+/* ReelShort is a complete set of eight vertical pieces. Use eight equal tracks
+   so its final edge aligns with every landscape row. */
+@media (min-width: 721px) {
+  /* The four palace shorts occupy the first two tracks of the landscape
+     gallery: half a row, with identical left and right edges. */
+  #xinhua .subcategory--short .video-group.portrait-group {
+    width: calc((100% - 16px) / 2);
+  }
+
+  #xinhua .subcategory--short .video-group.portrait-group .video-gallery {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  #xinhua .subcategory--short .video-group.portrait-group .animated-video-list-item {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--card-ratio);
+  }
+
+  #works .labeled-gallery-row--reelshort .video-group.portrait-group .video-gallery {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  #works .labeled-gallery-row--reelshort .video-group.portrait-group .animated-video-list-item {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--card-ratio);
+  }
+}
+
+#works .video-group.landscape-group .animated-video-list-item {
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+}
+
+/* The complete card tilts; its media keeps the source video aspect ratio. */
 #works .video-card {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   margin: 0;
   min-width: 0;
+  padding: 1.851852%;
+  background: #0a0f13;
 }
 
 #works .video-card .video-tile {
-  box-shadow: 0 12px 28px rgba(0, 0, 0, .28) !important;
-  transition: box-shadow 240ms ease;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 3.846154cqw !important;
+  background: #222;
+  box-shadow: none !important;
 }
 
-#works .video-card:hover .video-tile,
-#works .video-card:focus-within .video-tile {
-  box-shadow: 0 18px 38px rgba(0, 0, 0, .38) !important;
+#works .video-card .video-tile :is(video, img) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: none !important;
+  border-radius: inherit !important;
+}
+
+/* Landscape previews may include export padding around their 16:9 picture. */
+#works .video-card.landscape .video-tile :is(video, img) {
+  object-fit: cover;
+}
+
+/* These two previews also contain baked-in cinematic letterboxing.
+   Crop the card preview only; the full player retains the complete source. */
+#works .video-card--tibet-01 .video-tile video {
+  transform: scale(1.33) !important;
+}
+
+#works .video-card--documentary-trailers-01 .video-tile video {
+  object-position: center 22%;
+  transform: scale(1.5) !important;
+}
+
+#works .video-card .video-tile:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
 }
 
 /* Keep previews at their natural brightness while hovering. */
@@ -98,56 +197,120 @@
   filter: none;
 }
 
-/* The Tibet preview includes letterboxing in the source; crop it in the card only. */
-#works .video-card--tibet-01 .video-tile video,
-#works .video-card--documentary-trailers-01 .video-tile video {
-  object-position: center;
-  transform: scale(1.42);
-}
-
-#works .video-card--tibet-01 .video-tile:hover video,
-#works .video-card--tibet-01 .video-tile:focus-visible video,
-#works .video-card--documentary-trailers-01 .video-tile:hover video,
-#works .video-card--documentary-trailers-01 .video-tile:focus-visible video {
-  transform: scale(1.45);
-}
-
 #works .video-caption {
-  min-height: 0;
-  padding: 8px 0 0;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18%;
+  padding: 2cqw 3cqw;
+  text-align: center;
+  background: #0a0f13;
 }
 
 #works .video-caption strong {
-  font-size: 13px;
+  width: 100%;
+  color: #fff;
+  font-size: clamp(10px, 4.63cqw, 16px);
   line-height: 1.45;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/* Keep the complete 16:9 preview visible, then place the title below it. */
+#works .video-card.landscape {
+  height: auto;
+}
+
+#works .video-card.landscape .video-tile {
+  height: auto;
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 9;
+}
+
+#works .video-card.landscape .video-caption {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  min-height: 12cqw;
+  flex: 0 0 12cqw;
+}
+
+#works .video-caption .blur-text {
+  display: inline;
+}
+
+#works .video-caption .blur-text-segment {
+  display: inline;
 }
 
 @media (min-width: 721px) and (max-width: 1100px) {
-  #works {
-    --landscape-columns: 3;
-    --portrait-columns: 6;
+  #works .video-group.landscape-group .video-gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #xinhua .subcategory--short .video-group.portrait-group {
+    width: calc((200% - 16px) / 3);
+  }
+
+  #xinhua .subcategory--short .video-group.portrait-group .video-gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #works .labeled-gallery-row--reelshort .video-group.portrait-group .video-gallery {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 720px) {
   #works {
-    --landscape-columns: 2;
-    --portrait-columns: 3;
+    --gallery-card-height: clamp(150px, 46vw, 210px);
     --video-row-gap: 20px;
   }
 
   #works .video-group .video-gallery {
-    column-gap: 10px;
-    row-gap: 16px !important;
+    gap: 16px 10px !important;
+  }
+
+  #works .video-group.landscape-group .video-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #works .video-group.portrait-group .animated-video-list-item {
+    --card-height: clamp(140px, 38vw, 170px);
+  }
+
+  #xinhua .subcategory--short .video-group.portrait-group {
+    width: 100%;
+  }
+
+  #xinhua .subcategory--short .video-group.portrait-group .video-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 10px !important;
+  }
+
+  #xinhua .subcategory--short .video-group.portrait-group .animated-video-list-item,
+  #works .labeled-gallery-row--reelshort .video-group.portrait-group .animated-video-list-item {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--card-ratio);
+  }
+
+  #works .labeled-gallery-row--reelshort .video-group.portrait-group .video-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 10px !important;
   }
 
   #works .category-section + .category-section {
     margin-top: 28px;
   }
 
-  #works .video-caption strong {
-    font-size: 12px;
-  }
 }
 
 /* The existing 1.3x body zoom otherwise turns its 320px minimum into 416px. */

@@ -1,4 +1,8 @@
 .animated-video-list-item {
+  flex: 0 0 auto;
+  height: var(--card-height, var(--gallery-card-height));
+  width: calc(var(--card-height, var(--gallery-card-height)) * var(--card-ratio-value));
+  aspect-ratio: var(--card-ratio);
   min-width: 0;
   transform-origin: center;
 }

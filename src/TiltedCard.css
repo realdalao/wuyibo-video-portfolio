@@ -12,10 +12,6 @@
   overflow: visible !important;
 }
 
-.video-card:has(.tilted-card-figure:hover) {
-  z-index: 8;
-}
-
 .tilted-card-figure:hover {
   z-index: 8;
   transition-delay: 0s;
@@ -27,18 +23,6 @@
   transform-style: preserve-3d;
   transform-origin: center;
   will-change: transform;
-}
-
-.tilted-card-inner > .video-tile {
-  width: 100%;
-  transform: translateZ(0);
-}
-
-.tilted-card-figure:hover .video-tile video,
-.tilted-card-figure:hover .video-tile img,
-.tilted-card-figure:focus-within .video-tile video,
-.tilted-card-figure:focus-within .video-tile img {
-  transform: scale(1.06) !important;
 }
 
 @media (hover: none), (prefers-reduced-motion: reduce) {
