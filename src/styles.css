@@ -7347,4 +7347,35 @@ body,
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
+
+  /* Android browsers can retain the native fullscreen surface dimensions for
+     one frame after exit. Keep the rebuilt inline player inside its card. */
+  .video-modal .player-stage,
+  .video-modal .video-frame,
+  .video-modal .video-ambient {
+    max-inline-size: 100% !important;
+    contain: layout paint;
+  }
+
+  .video-modal .video-frame {
+    position: relative !important;
+  }
+
+  .video-modal .video-ambient {
+    position: absolute !important;
+    inset: 0 !important;
+    inline-size: 100% !important;
+    block-size: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .video-modal .video-ambient__media {
+    position: absolute !important;
+    inset: 0 !important;
+    inline-size: 100% !important;
+    block-size: 100% !important;
+    max-inline-size: 100% !important;
+    max-block-size: 100% !important;
+    margin: 0 !important;
+  }
 }

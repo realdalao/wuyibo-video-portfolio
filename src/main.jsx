@@ -895,6 +895,11 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
   const [isContactAnimating, setIsContactAnimating] = useState(false);
   const [orientationSwitchPhase, setOrientationSwitchPhase] = useState("idle");
   const [isSameOrientationSwitching, setIsSameOrientationSwitching] = useState(false);
+  const [playerInstanceKey, setPlayerInstanceKey] = useState(0);
+  const playerVideoRef = useRef(null);
+  const fullscreenPlaybackRef = useRef(null);
+  const wasPlayerFullscreenRef = useRef(false);
+  const fullscreenRestoreTimerRef = useRef(null);
   const switchTransitionRef = useRef(null);
   const orientationSwitchTimersRef = useRef([]);
   const { videos, index, collectionTitle } = viewer;
@@ -979,6 +984,9 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
   useEffect(() => {
     setFailed(false);
     setSourceIndex(0);
+    setPlayerInstanceKey(0);
+    fullscreenPlaybackRef.current = null;
+    wasPlayerFullscreenRef.current = false;
     setIsLiked(false);
     setLikeCount(0);
     setIsLikePending(false);
@@ -987,6 +995,60 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
     setShareStatus("");
     setIsContactAnimating(false);
   }, [video.id]);
+
+  useEffect(() => {
+    const playerVideo = playerVideoRef.current;
+    if (!playerVideo) return undefined;
+
+    const playerIsFullscreen = () => {
+      const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+      return fullscreenElement === playerVideo
+        || fullscreenElement?.contains?.(playerVideo)
+        || playerVideo.webkitDisplayingFullscreen === true;
+    };
+
+    const rememberFullscreenEntry = () => {
+      wasPlayerFullscreenRef.current = true;
+    };
+
+    const restoreInlinePlayer = () => {
+      if (!window.matchMedia("(max-width: 720px)").matches) return;
+      if (!wasPlayerFullscreenRef.current || playerIsFullscreen()) return;
+
+      wasPlayerFullscreenRef.current = false;
+      fullscreenPlaybackRef.current = {
+        videoId: video.id,
+        currentTime: Number.isFinite(playerVideo.currentTime) ? playerVideo.currentTime : 0,
+        wasPaused: playerVideo.paused,
+      };
+
+      window.clearTimeout(fullscreenRestoreTimerRef.current);
+      fullscreenRestoreTimerRef.current = window.setTimeout(() => {
+        setPlayerInstanceKey((current) => current + 1);
+      }, 0);
+    };
+
+    const handleFullscreenChange = () => {
+      if (playerIsFullscreen()) {
+        rememberFullscreenEntry();
+      } else {
+        restoreInlinePlayer();
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    playerVideo.addEventListener("webkitbeginfullscreen", rememberFullscreenEntry);
+    playerVideo.addEventListener("webkitendfullscreen", restoreInlinePlayer);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      playerVideo.removeEventListener("webkitbeginfullscreen", rememberFullscreenEntry);
+      playerVideo.removeEventListener("webkitendfullscreen", restoreInlinePlayer);
+      window.clearTimeout(fullscreenRestoreTimerRef.current);
+    };
+  }, [playerInstanceKey, playbackSrc, video.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1118,7 +1180,8 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
                 <div className="player-error"><PlayerGlyph name="play" size={32} /><strong>暂时无法播放此视频</strong><span>请检查本地素材文件是否完整。</span></div>
               ) : (
                 <VideoAmbient
-                  key={playbackSrc}
+                  key={`${playbackSrc}-${playerInstanceKey}`}
+                  ref={playerVideoRef}
                   src={playbackSrc}
                   poster={video.poster}
                   autoPlay
@@ -1131,6 +1194,19 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
                   blurAmount={70}
                   intensity={0.9}
                   active={!isSameOrientationSwitching}
+                  onLoadedMetadata={(event) => {
+                    const savedPlayback = fullscreenPlaybackRef.current;
+                    if (!savedPlayback || savedPlayback.videoId !== video.id) return;
+
+                    const element = event.currentTarget;
+                    element.currentTime = Math.min(savedPlayback.currentTime, element.duration || savedPlayback.currentTime);
+                    if (savedPlayback.wasPaused) {
+                      element.pause();
+                    } else {
+                      element.play().catch(() => {});
+                    }
+                    fullscreenPlaybackRef.current = null;
+                  }}
                   onPointerUp={(event) => {
                     const element = event.currentTarget;
                     window.requestAnimationFrame(() => element.blur());
