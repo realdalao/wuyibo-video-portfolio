@@ -778,6 +778,8 @@ footer,
 }
 
 @media (max-width: 720px) {
+  .site-header { display: none !important; }
+
   .editor-experience {
     width: 100%;
     padding: 64px 16px 80px;
@@ -5667,6 +5669,48 @@ video,
   isolation: isolate;
 }
 
+/* Full-page interpretation of the supplied Halftone Dots shader. Kept as
+   layered CSS rather than a persistent WebGL canvas so the portfolio remains
+   stable on Safari and lower-power devices. */
+.halftone-background {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  min-height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: #111;
+  background-image:
+    radial-gradient(circle at 24% 18%, rgba(212, 212, 212, .22) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 76% 72%, rgba(255, 255, 255, .13) 0 1px, transparent 1.7px),
+    linear-gradient(137deg, #d4d4d4 0%, #525252 37%, #111 68%, #fafafa 130%);
+  background-size: 8px 8px, 11px 11px, 100% 100%;
+  background-position: 0 0, 4px 6px, center;
+}
+
+.halftone-background::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: .88;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .055) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .13) 0 1px, transparent 1px 6px),
+    radial-gradient(ellipse at center, transparent 26%, rgba(0, 0, 0, .5) 100%);
+  mix-blend-mode: soft-light;
+}
+
+canvas.halftone-background {
+  display: none !important;
+}
+
+html,
+body,
+#root {
+  background-color: #111 !important;
+  background-image: none !important;
+}
+
 #root > .site-header,
 #root > main,
 #root > .editor-footer {
@@ -5746,11 +5790,11 @@ video,
   text-shadow: none !important;
 }
 
-/* Pixel texture background supplied for the full document. */
+/* Brick texture supplied for the full document. */
 :root {
   color: #f5f5f5;
-  background-color: #800e13;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23250902' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+  background-color: #780000;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e85d04' fill-opacity='0.46' fill-rule='evenodd'/%3E%3C/svg%3E");
   --ink: #f5f5f5;
   --muted: #b8bec8;
   --line: rgba(255, 255, 255, 0.16);
@@ -5759,8 +5803,8 @@ video,
 html,
 body,
 #root {
-  background-color: #800e13 !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23250902' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E") !important;
+  background-color: #780000 !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e85d04' fill-opacity='0.46' fill-rule='evenodd'/%3E%3C/svg%3E") !important;
 }
 
 #root > main,
@@ -7012,9 +7056,54 @@ html[data-video-switch-layout="same-orientation"][data-video-switch-direction="p
   background: #640d14 !important;
 }
 
+/* Extend the supplied wine-red palette through the page's framing elements. */
+.site-header {
+  background: linear-gradient(90deg, #250902 0%, #38040e 48%, #640d14 100%) !important;
+  border-bottom: 1px solid rgba(137, 53, 21, .38) !important;
+  box-shadow: 0 16px 28px rgba(0, 0, 0, .58) !important;
+}
+
+/* The navigation's wine-red surface sits beneath the transparent Hero film
+   and light threads, spanning the full viewport width. */
+.hero-thread-stage {
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(90deg, #250902 0%, #38040e 48%, #640d14 100%);
+}
+
+.hero-thread-stage .editor-hero {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0 !important;
+  clip-path: none;
+  background: transparent !important;
+}
+
+.editor-hero .hero-video-crossfade,
+.editor-hero .hero-fallback-poster,
+.hero-thread-stage .hero-web-threads {
+  display: block !important;
+}
+
+.editor-footer {
+  background: linear-gradient(135deg, #38040e 0%, #640d14 48%, #800e13 100%) !important;
+  border-top: 1px solid rgba(173, 40, 49, .7) !important;
+  box-shadow: 0 -18px 34px rgba(0, 0, 0, .58) !important;
+}
+
+.editor-footer .footer-main {
+  border-color: rgba(173, 40, 49, .54) !important;
+}
+
+.editor-footer a:hover {
+  color: #ad2831 !important;
+}
+
 /* Add depth below the moving Hero ribbon without changing its crisp top edge. */
 .hero-text-loop {
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, .62);
 }
 
 /* Lift every gallery card as a single framed object, including its caption. */
@@ -7118,4 +7207,144 @@ html[data-video-switch-layout="same-orientation"][data-video-switch-direction="p
 @media (max-width: 720px) {
   #works .video-card { border-radius: 0 !important; }
   #works .video-card .video-tile { border-radius: 3.846154cqw !important; }
+}
+
+/* Full-page geometric line texture. */
+:root,
+html,
+body,
+#root {
+  background-color: #780000 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23e85d04' fill-opacity='0.46' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E") !important;
+}
+
+/* Mobile portfolio baseline. This final layer takes precedence over legacy
+   desktop experiments so compact screens keep one predictable reading rail. */
+@media (max-width: 720px) {
+  html { font-size: 16px; }
+  body { zoom: 1; min-width: 320px; overflow-x: hidden; }
+  :root { --page-gutter: 16px; --section-space: 36px; --video-row-gap: 28px; --gallery-video-radius: 7px; }
+
+  .site-header { position: sticky; top: 0; display: grid; grid-template-columns: minmax(72px, 1fr) auto minmax(72px, 1fr) !important; min-height: 52px; padding: max(8px, env(safe-area-inset-top)) 14px 8px; gap: 8px; }
+  .site-header .brand { grid-column: 2; font-size: 14px; letter-spacing: .12em !important; white-space: nowrap; }
+  .site-header .header-actions { display: contents; }
+  .site-header .soft-button, .site-header .dark-button { display: inline-flex !important; width: auto; min-height: 36px; padding: 0; font-size: 10px; line-height: 1; letter-spacing: .08em; background: transparent !important; }
+  .site-header .soft-button { grid-column: 3; grid-row: 1; justify-self: end; }
+  .site-header .dark-button { grid-column: 1; grid-row: 1; justify-self: start; }
+
+  .hero-thread-stage { overflow: clip; }
+  .hero-thread-stage .hero-web-threads { display: none !important; }
+  .editor-hero { width: calc(100% - 24px); aspect-ratio: 16 / 9; margin: 12px auto 0; border-radius: 10px !important; }
+  .editor-hero .hero-intro--depth { left: 16px; bottom: 14px; max-width: calc(100% - 32px); }
+  .editor-hero .hero-depth-text { padding: 0; }
+  .editor-hero .hero-depth-text .depth-text__face { font-size: clamp(28px, 9vw, 40px) !important; line-height: .95 !important; }
+  .hero-text-loop { height: 38px; margin-top: -6px; box-shadow: none; }
+  .hero-ribbon-track { animation: none; transform: none; }
+  .hero-ribbon-track span { font-size: 16px; letter-spacing: .08em; }
+
+  .editor-works, .editor-works .category-section { width: min(100% - 32px, 560px); margin-inline: auto; }
+  .editor-works .category-section, .editor-works .category-section + .category-section { margin-top: 0; }
+  .editor-works .category-section + .category-section { padding-top: var(--section-space); }
+  .category-section, .labeled-gallery-row, .knowledge-video-row, .subcategory { display: grid; grid-template-columns: minmax(0, 1fr) !important; gap: 14px; }
+  .category-heading, .labeled-gallery-heading, .knowledge-video-row .category-heading { position: static !important; width: 100%; text-align: left !important; }
+  .category-heading h3, .labeled-gallery-heading h3 { font-size: clamp(22px, 6vw, 28px) !important; line-height: 1.15; }
+  .category-section .subcategory h4 { margin: 8px 0 0; font-size: 14px; }
+
+  #works .video-group.landscape-group .video-gallery, .labeled-gallery-row .video-group.landscape-group .video-gallery, .category-section .grid-work-gallery .video-group.landscape-group .video-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 14px 10px !important; }
+  #works .video-group.portrait-group .video-gallery, .labeled-gallery-row .video-group.portrait-group .video-gallery, .category-section .grid-work-gallery .video-group.portrait-group .video-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px 8px !important; }
+  #works .video-group.portrait-group .animated-video-list-item { width: 100%; height: auto; }
+  #works .video-card { display: flex; height: auto; min-height: 0; padding: 0; gap: 7px; overflow: visible !important; background: transparent; box-shadow: none !important; }
+  #works .video-card .video-tile { height: auto !important; min-height: 0; border-radius: var(--gallery-video-radius) !important; background: #171717; }
+  #works .video-caption { position: static; display: block; min-height: 0; padding: 0 2px; color: #fff; text-align: left; background: transparent; }
+  #works .video-caption strong { font-size: clamp(11px, 3.1vw, 13px); line-height: 1.35; }
+  #works .video-card--course-04 .video-caption strong { font-size: clamp(10px, 2.9vw, 12px); }
+  .video-groups, .split-category-gallery { gap: 28px !important; }
+
+  .video-modal { display: block !important; overflow-y: auto; overscroll-behavior: contain; padding: max(62px, calc(env(safe-area-inset-top) + 54px)) 44px max(28px, env(safe-area-inset-bottom)) !important; }
+  .video-modal > .modal-shell, .video-modal > .modal-shell.landscape, .video-modal > .modal-shell.portrait { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: auto auto !important; width: min(100%, 560px) !important; max-width: none !important; height: auto !important; min-height: 0; margin: 0 auto; gap: 18px !important; }
+  .video-modal > .modal-shell .spatial-main, .video-modal > .modal-shell .player-detail-panel { grid-column: 1 !important; width: 100% !important; margin: 0 !important; }
+  .video-modal > .modal-shell .spatial-main { grid-row: 1 !important; }
+  .video-modal > .modal-shell .player-detail-panel { grid-row: 2 !important; }
+  .video-modal > .modal-shell.landscape .spatial-main { margin-top: 0; }
+  .video-modal > .modal-shell.portrait { width: min(100%, 340px) !important; }
+  .video-modal > .modal-shell.portrait .player-stage, .video-modal > .modal-shell.portrait .player-stage .video-frame { width: 100% !important; height: min(56dvh, 560px) !important; }
+  .video-modal .player-detail-panel { padding: 0; }
+  .video-modal .player-detail-panel h2 { margin: 0 0 14px; font-size: clamp(17px, 5vw, 21px); line-height: 1.25; }
+  .video-modal .player-detail-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
+  .video-modal .player-creator { min-width: 0; }
+  .video-modal .player-actions { width: 100%; overflow: visible; }
+  .video-modal .player-project-summary { padding: 14px; border-radius: 12px; }
+  .video-modal .spatial-close { top: max(12px, env(safe-area-inset-top)) !important; right: 12px !important; width: 44px; height: 44px; }
+  .video-modal > .player-switch { top: 30dvh !important; width: 40px; height: 40px; transform: translateY(-50%); }
+  .video-modal > .player-switch--previous { left: 2px !important; }
+  .video-modal > .player-switch--next { right: 2px !important; }
+
+  .tilted-card-figure { perspective: none; }
+  .tilted-card-inner { transform: none !important; will-change: auto; }
+}
+
+@media (prefers-reduced-motion: reduce), (max-width: 720px) {
+  .hero-ribbon-track, .hero-ribbon-track *, .fold-text-piece, .blur-text-segment { animation: none !important; transition: none !important; }
+}
+
+/* Phone-only finishing pass: retain the identity lockup without decoding the
+   Hero film, and keep every gallery title inside its own media module. */
+@media (max-width: 720px) {
+  .hero-thread-stage .editor-hero {
+    height: 108px !important;
+    min-height: 108px;
+    max-height: 108px;
+    aspect-ratio: auto;
+    background: linear-gradient(135deg, #38040e, #640d14) !important;
+  }
+
+  .editor-hero .hero-video-crossfade,
+  .editor-hero .hero-fallback-poster,
+  .editor-hero .hero-background-video {
+    display: none !important;
+  }
+
+  #works .video-card {
+    display: grid;
+    grid-template-rows: auto;
+    align-content: start;
+    inline-size: 100%;
+    max-inline-size: 100%;
+  }
+
+  #works .video-card.video-card--titled {
+    /* Compact two-line rail: enough room for wrapping without making the
+       caption visually heavier than the thumbnail. */
+    grid-template-rows: auto 36px;
+  }
+
+  #works .video-card.video-card--titled .video-caption {
+    position: static !important;
+    inset: auto !important;
+    display: flex !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    flex: none !important;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    padding: 3px 6px !important;
+    overflow: hidden;
+    box-sizing: border-box;
+    background: #0a0f13 !important;
+  }
+
+  #works .video-card.video-card--titled .video-caption strong,
+  #works .video-card.video-card--course-04 .video-caption strong {
+    display: -webkit-box !important;
+    overflow: hidden;
+    max-inline-size: 100%;
+    line-height: 1.35 !important;
+    text-align: center;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
 }

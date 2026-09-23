@@ -22,6 +22,7 @@ import DecryptedText from "./components/ui/DecryptedText";
 import WebThreads from "./components/ui/WebThreads";
 import DepthText from "./components/ui/DepthText";
 import MetallicPaint from "./components/ui/MetallicPaint";
+import HalftoneDotsBackground from "./components/ui/HalftoneDotsBackground";
 
 // Start fetching the WebGL background with the main page instead of waiting
 // for the first video modal to open. React.lazy still keeps it in a separate
@@ -547,7 +548,6 @@ function CrossfadeHeroVideo() {
           className={`hero-background-video ${heroSource.fallback ? "hero-background-video--safari-fallback" : ""} ${visibleIndex === index && crossfade?.from !== index ? "is-visible" : ""} ${crossfade?.from === index ? "is-fading-out" : ""} ${crossfade?.to === index ? "is-fading-in" : ""}`}
           src={heroSource.src}
           autoPlay={index === 0}
-          defaultMuted
           muted
           playsInline
           loop={false}
@@ -636,6 +636,15 @@ const AutoplayPreview = memo(function AutoplayPreview({ video }) {
   useEffect(() => {
     const element = videoRef.current;
     if (!element) return undefined;
+
+    // Mobile browsers already have a constrained decode budget. Keep the
+    // poster-first gallery treatment there and reserve playback for the video
+    // the visitor explicitly opens.
+    if (window.matchMedia("(max-width: 720px)").matches) {
+      previewPlayQueue.delete(element);
+      element.pause();
+      return undefined;
+    }
 
     if (!isNearViewport) {
       previewPlayQueue.delete(element);
@@ -1233,7 +1242,7 @@ function Experience() {
 }
 
 function FooterDecrypt({ text, delay = 0 }) {
-  return <DecryptedText text={text} delay={delay} speed={58} encryptedClassName="footer-decrypt-encrypted" />;
+  return <DecryptedText text={text} delay={Math.round(delay * 0.4)} speed={28} encryptedClassName="footer-decrypt-encrypted" />;
 }
 
 function Footer() {
@@ -1400,6 +1409,7 @@ function App() {
 
   return (
     <>
+      <HalftoneDotsBackground />
       <PageLoader visible={!pageReady} />
       <Header />
       <main>

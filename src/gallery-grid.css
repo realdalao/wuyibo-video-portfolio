@@ -94,10 +94,11 @@
 /* ReelShort is a complete set of eight vertical pieces. Use eight equal tracks
    so its final edge aligns with every landscape row. */
 @media (min-width: 721px) {
-  /* The four palace shorts occupy the first two tracks of the landscape
-     gallery: half a row, with identical left and right edges. */
+  /* The four palace shorts span the first three landscape tracks. This gives
+     the portrait cards enough presence while their right edge aligns with the
+     third landscape card above. */
   #xinhua .subcategory--short .video-group.portrait-group {
-    width: calc((100% - 16px) / 2);
+    width: calc((3 * 100% - 16px) / 4);
   }
 
   #xinhua .subcategory--short .video-group.portrait-group .video-gallery {
@@ -221,7 +222,8 @@
   overflow-wrap: anywhere;
 }
 
-/* Keep the complete 16:9 preview visible, then place the title below it. */
+/* Keep the complete 16:9 preview visible, then place the title in the
+   centered black caption panel directly beneath it. */
 #works .video-card.landscape {
   height: auto;
 }
@@ -238,6 +240,10 @@
   width: 100%;
   min-height: 12cqw;
   flex: 0 0 12cqw;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 #works .video-caption .blur-text {

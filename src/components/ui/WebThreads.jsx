@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Mesh, Program, Renderer, Triangle } from "ogl";
 import "./web-threads.css";
 
@@ -89,10 +89,21 @@ export default function WebThreads({
   className = ""
 }) {
   const mountRef = useRef(null);
+  const [isCompactViewport, setIsCompactViewport] = useState(() => (
+    typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches
+  ));
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 720px)");
+    const updateViewport = () => setIsCompactViewport(mediaQuery.matches);
+    updateViewport();
+    mediaQuery.addEventListener("change", updateViewport);
+    return () => mediaQuery.removeEventListener("change", updateViewport);
+  }, []);
 
   useEffect(() => {
     const mount = mountRef.current;
-    if (!mount || !window.WebGL2RenderingContext) return undefined;
+    if (isCompactViewport || !mount || !window.WebGL2RenderingContext) return undefined;
 
     const renderer = new Renderer({ webgl: 2, alpha: true, premultipliedAlpha: true, dpr: Math.min(devicePixelRatio, 2) });
     const gl = renderer.gl;
@@ -148,7 +159,8 @@ export default function WebThreads({
       canvas.remove();
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [brightness, color1, color2, color3, falloff, frequency, glow, grain, grainIntensity, mirror, mouseInteraction, mouseStrength, opacity, pinchPosition, position, shimmer, speed, spread, taper, thickness, threadCount]);
+  }, [brightness, color1, color2, color3, falloff, frequency, glow, grain, grainIntensity, isCompactViewport, mirror, mouseInteraction, mouseStrength, opacity, pinchPosition, position, shimmer, speed, spread, taper, thickness, threadCount]);
 
+  if (isCompactViewport) return null;
   return <div ref={mountRef} className={`web-threads ${className}`.trim()} aria-hidden="true" />;
 }

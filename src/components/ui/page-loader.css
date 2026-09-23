@@ -30,6 +30,32 @@ html.is-page-loading body {
   text-transform: none !important;
 }
 
+@media (max-width: 720px) {
+  html.is-page-loading,
+  html.is-page-loading body,
+  html.is-page-loading #root {
+    background: #000 !important;
+  }
+
+  .page-loader {
+    inset: 0;
+    width: 100vw;
+    min-width: 100vw;
+    max-width: none;
+    min-height: 100dvh;
+    height: 100dvh;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+    overflow: hidden;
+    box-sizing: border-box;
+    background: #000 !important;
+  }
+
+  .page-loader-title {
+    font-size: clamp(30px, 9vw, 42px);
+    text-align: center;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-loader-title {
     background: none;

@@ -59,8 +59,8 @@ void main() {
 
 export default function MagicRings({
   active = true,
-  color = "#468ee8",
-  colorTwo = "#a879ff",
+  color = "#ad2831",
+  colorTwo = "#800e13",
   ringCount = 6,
   speed = 0.75,
   attenuation = 10,
@@ -95,7 +95,7 @@ export default function MagicRings({
 
     // The canvas itself is the player-page background, so it must obscure
     // the page beneath while the animated rings remain the only visual layer.
-    renderer.setClearColor(0x080b12, 1);
+    renderer.setClearColor(0x000000, 1);
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
