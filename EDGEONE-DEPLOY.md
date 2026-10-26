@@ -7,7 +7,11 @@
 
 后续修改代码、提交并推送到 `main`，由 Makers 后台自动构建部署。构建配置由根目录 `edgeone.json` 管理：`npm ci` → `npm run build` → `dist`。Node 24.18.0 满足当前 Vite 8 的版本要求。
 
-EdgeOne 的 `edge-functions/api/[[path]].js` 将视频、B 站和点赞请求转发至原 Cloudflare 服务。Cloudflare 的 `functions/` 和 D1 数据库继续提供后端服务，不能下线。两站共享点赞累计数，访客 Cookie 按域名隔离。
+点赞接口已迁移到 Makers Cloud Functions + Blob（`portfolio-likes-v1`），每个视频和访客使用独立记录，强一致列举计算总数；同一访客重复点赞不增加计数，不同访客并发写入不覆盖共享总数。当前原 D1 快照只有一条 0 计数、无有效投票，已核对并完成初始化。
+
+B 站接口在 Makers Edge Functions 直接执行。飞书视频接口暂保留转发，待项目生产环境配置 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET` 后切换为直接访问飞书。视频文件位置和前端源地址均保持原样。
+
+原 Cloudflare 网站继续使用独立 D1 库，迁移后两站新增点赞不再自动互相同步。
 
 此前 CLI 上传的线上快照保留在 `work/edgeone-mirror/`，仅作历史备份，不再作为部署入口。新的 Git 构建发布仓库中的源码。
 
