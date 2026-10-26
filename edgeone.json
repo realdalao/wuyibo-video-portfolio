@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "installCommand": "npm ci",
   "outputDirectory": "dist",
-  "nodeVersion": "22.22.0",
+  "nodeVersion": "24.18.0",
   "headers": [
     {
       "source": "/media/mobile-posters/*",
