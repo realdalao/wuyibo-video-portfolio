@@ -31,7 +31,11 @@ export function createLikesHandler(getStore) {
     let action;
     if (request.method === 'POST') {
       const origin = request.headers.get('origin');
-      if (origin && origin !== new URL(request.url).origin) return json({ error: 'Invalid origin' }, 403);
+      // Makers may expose an internal request URL behind its reverse proxy.
+      // Fetch Metadata is browser-controlled and preserves the external same-origin relationship.
+      if (origin && origin !== new URL(request.url).origin && request.headers.get('sec-fetch-site') !== 'same-origin') {
+        return json({ error: 'Invalid origin' }, 403);
+      }
       try { ({ action } = await request.json()); } catch { return json({ error: 'Invalid request body' }, 400); }
       if (!['like', 'unlike'].includes(action)) return json({ error: 'Invalid like action' }, 400);
     }

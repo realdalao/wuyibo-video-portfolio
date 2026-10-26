@@ -1,11 +1,11 @@
-// Transitional forwarding until the original Feishu credentials are configured on Makers.
-export default async function onRequest({ request }) {
-  const incoming = new URL(request.url);
-  const upstream = new URL(incoming.pathname + incoming.search, 'https://wuyibo-video-portfolio.pages.dev');
-  const headers = new Headers();
-  for (const name of ['range', 'if-range']) {
-    const value = request.headers.get(name);
-    if (value) headers.set(name, value);
-  }
-  return fetch(upstream.toString(), { method: request.method, headers });
+// Reuse the existing Feishu source mapping; execute directly on Makers.
+import { onRequestGet as get, onRequestHead as head } from '../../../functions/api/video/[id].js';
+
+async function handle(handler, context) {
+  const response = await handler(context);
+  const headers = new Headers(response.headers);
+  headers.set('x-portfolio-backend', 'edgeone-feishu');
+  return new Response(response.body, { status: response.status, headers });
 }
+export const onRequestGet = context => handle(get, context);
+export const onRequestHead = context => handle(head, context);

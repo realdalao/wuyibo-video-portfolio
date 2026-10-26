@@ -47,3 +47,13 @@ test('migration, origin and action are validated before any write', async () => 
   assert.equal((await request('one', 'invalid')).status, 400);
   assert.equal((await request('one')).body.count, 0);
 });
+
+test('same-origin browser POST survives the Makers reverse proxy URL', async () => {
+  const { handle } = setup();
+  const response = await handle({ params: { id: 'test-video' }, request: new Request('http://internal/api/likes/test-video', {
+    method: 'POST', headers: { origin: 'https://portfolio.example', 'sec-fetch-site': 'same-origin', cookie: 'portfolio_like_visitor=one' },
+    body: JSON.stringify({ action: 'like' })
+  }) });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { count: 1, liked: true });
+});

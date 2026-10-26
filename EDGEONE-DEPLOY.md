@@ -9,7 +9,7 @@
 
 点赞接口已迁移到 Makers Cloud Functions + Blob（`portfolio-likes-v1`），每个视频和访客使用独立记录，强一致列举计算总数；同一访客重复点赞不增加计数，不同访客并发写入不覆盖共享总数。当前原 D1 快照只有一条 0 计数、无有效投票，已核对并完成初始化。
 
-B 站接口在 Makers Edge Functions 直接执行。飞书视频接口暂保留转发，待项目生产环境配置 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET` 后切换为直接访问飞书。视频文件位置和前端源地址均保持原样。
+飞书与 B 站接口均在 Makers Edge Functions 直接执行。飞书凭证复用已验证可访问原视频的本地飞书 CLI 应用，并配置于 Makers 生产环境；密钥不写入仓库。视频文件位置和前端源地址均保持原样。
 
 原 Cloudflare 网站继续使用独立 D1 库，迁移后两站新增点赞不再自动互相同步。
 
