@@ -1,8 +1,9 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import "./video-ambient.css";
 
 const CANVAS_WIDTH = 64;
 const CANVAS_HEIGHT = 36;
+const MOBILE_MEDIA_QUERY = "(max-width: 720px)";
 
 /**
  * A lightweight ambient layer that samples the active video at low resolution.
@@ -14,14 +15,35 @@ const VideoAmbient = forwardRef(function VideoAmbient(
 ) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(() => (
+    typeof window !== "undefined"
+    && typeof window.matchMedia === "function"
+    && window.matchMedia(MOBILE_MEDIA_QUERY).matches
+  ));
 
   useImperativeHandle(forwardedRef, () => videoRef.current);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return undefined;
+
+    const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
+    const updateViewport = (event) => setIsMobile(event.matches);
+    setIsMobile(mediaQuery.matches);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", updateViewport);
+      return () => mediaQuery.removeEventListener("change", updateViewport);
+    }
+
+    mediaQuery.addListener(updateViewport);
+    return () => mediaQuery.removeListener(updateViewport);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d", { alpha: false });
-    if (!video || !canvas || !context || !active) return undefined;
+    if (!video || !canvas || !context || !active || isMobile) return undefined;
 
     let frame = 0;
     const paint = () => {
@@ -37,18 +59,20 @@ const VideoAmbient = forwardRef(function VideoAmbient(
 
     frame = requestAnimationFrame(paint);
     return () => cancelAnimationFrame(frame);
-  }, [active]);
+  }, [active, isMobile]);
 
   return (
     <div className={`video-ambient ${className}`}>
-      <canvas
-        ref={canvasRef}
-        className="video-ambient__glow"
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
-        aria-hidden="true"
-        style={{ filter: `blur(${blurAmount}px) saturate(1.18)`, opacity: intensity }}
-      />
+      {!isMobile && (
+        <canvas
+          ref={canvasRef}
+          className="video-ambient__glow"
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          aria-hidden="true"
+          style={{ filter: `blur(${blurAmount}px) saturate(1.18)`, opacity: intensity }}
+        />
+      )}
       <video ref={videoRef} className="video-ambient__media" {...videoProps} />
     </div>
   );

@@ -7,28 +7,207 @@ import {
   ChevronRight,
   Grid2X2,
 } from "lucide-react";
+// 样式导入顺序即层叠顺序：styles.css 为历史主体（内含大量既有覆盖），
+// 下列文件是按区块拆分出的新增/覆盖层，必须在其后加载才能生效。
 import "./styles.css";
 import "./gallery-grid.css";
 import "./experience.css";
 import "./footer.css";
-import FoldText from "./FoldText";
-import BlurText from "./BlurText";
-import "./BlurText.css";
-import TiltedCard from "./TiltedCard";
-import AnimatedListItem from "./AnimatedListItem";
-import PageLoader from "./components/ui/PageLoader";
+import "./header-nav.css";
+import "./category-kicker.css";
+import "./player-caption.css";
 import VideoAmbient from "./components/ui/VideoAmbient";
-import DecryptedText from "./components/ui/DecryptedText";
-import WebThreads from "./components/ui/WebThreads";
-import DepthText from "./components/ui/DepthText";
-import MetallicPaint from "./components/ui/MetallicPaint";
-import HalftoneDotsBackground from "./components/ui/HalftoneDotsBackground";
+const FoldText = lazy(() => import("./FoldText"));
+const BlurText = lazy(() => import("./BlurText"));
+const TiltedCard = lazy(() => import("./TiltedCard"));
+const AnimatedListItem = lazy(() => import("./AnimatedListItem"));
+const PageLoader = lazy(() => import("./components/ui/PageLoader"));
+const DecryptedText = lazy(() => import("./components/ui/DecryptedText"));
+const WebThreads = lazy(() => import("./components/ui/WebThreads"));
+const DepthText = lazy(() => import("./components/ui/DepthText"));
+const MetallicPaint = lazy(() => import("./components/ui/MetallicPaint"));
+const HalftoneDotsBackground = lazy(() => import("./components/ui/HalftoneDotsBackground"));
+const MagicRings = lazy(() => import("./components/ui/MagicRings"));
 
-// Start fetching the WebGL background with the main page instead of waiting
-// for the first video modal to open. React.lazy still keeps it in a separate
-// chunk, while reusing this already-settled promise when the player mounts.
-const magicRingsModule = import("./components/ui/MagicRings");
-const MagicRings = lazy(() => magicRingsModule);
+const MOBILE_MEDIA_QUERY = "(max-width: 720px)";
+const MOBILE_POSTER_ROOT_MARGIN = "900px 0px";
+const MOBILE_POSTER_MAX_CONCURRENT = 3;
+
+function useMobileViewport() {
+  const [isMobile, setIsMobile] = useState(() => (
+    typeof window !== "undefined"
+    && typeof window.matchMedia === "function"
+    && window.matchMedia(MOBILE_MEDIA_QUERY).matches
+  ));
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return undefined;
+    const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
+    const updateViewport = (event) => setIsMobile(event.matches);
+    setIsMobile(mediaQuery.matches);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", updateViewport);
+      return () => mediaQuery.removeEventListener("change", updateViewport);
+    }
+
+    mediaQuery.addListener(updateViewport);
+    return () => mediaQuery.removeListener(updateViewport);
+  }, []);
+
+  return isMobile;
+}
+
+const mobilePosterRecords = new Map();
+const mobilePosterQueue = [];
+const activeMobilePosters = new Set();
+let mobilePosterObserver = null;
+
+function pumpMobilePosterQueue() {
+  mobilePosterQueue.sort((a, b) => (
+    Number(b.isVisible) - Number(a.isVisible)
+    || a.distance - b.distance
+  ));
+
+  while (activeMobilePosters.size < MOBILE_POSTER_MAX_CONCURRENT && mobilePosterQueue.length) {
+    const record = mobilePosterQueue.shift();
+    if (!record || record.started || !mobilePosterRecords.has(record.element)) continue;
+    record.queued = false;
+    record.started = true;
+    activeMobilePosters.add(record.element);
+    record.onStart();
+  }
+}
+
+function getMobilePosterObserver() {
+  if (mobilePosterObserver || typeof IntersectionObserver === "undefined") return mobilePosterObserver;
+
+  mobilePosterObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const record = mobilePosterRecords.get(entry.target);
+      if (!record) return;
+
+      record.isVisible = entry.isIntersecting
+        && entry.boundingClientRect.top < window.innerHeight
+        && entry.boundingClientRect.bottom > 0;
+      record.distance = Math.max(0, entry.boundingClientRect.top);
+      record.onVisibility(record.isVisible);
+
+      if (entry.isIntersecting && !record.started && !record.queued) {
+        record.queued = true;
+        mobilePosterQueue.push(record);
+      } else if (!entry.isIntersecting && record.queued && !record.started) {
+        record.queued = false;
+        const queuedIndex = mobilePosterQueue.indexOf(record);
+        if (queuedIndex >= 0) mobilePosterQueue.splice(queuedIndex, 1);
+      }
+    });
+    pumpMobilePosterQueue();
+  }, { rootMargin: MOBILE_POSTER_ROOT_MARGIN });
+
+  return mobilePosterObserver;
+}
+
+function observeMobilePoster(element, onStart, onVisibility) {
+  const observer = getMobilePosterObserver();
+  if (!element || !observer) {
+    onStart();
+    return () => {};
+  }
+
+  const record = {
+    element,
+    onStart,
+    onVisibility,
+    isVisible: false,
+    distance: Number.POSITIVE_INFINITY,
+    queued: false,
+    started: false,
+  };
+  mobilePosterRecords.set(element, record);
+  observer.observe(element);
+
+  return () => {
+    observer.unobserve(element);
+    mobilePosterRecords.delete(element);
+    if (record.queued) {
+      const queuedIndex = mobilePosterQueue.indexOf(record);
+      if (queuedIndex >= 0) mobilePosterQueue.splice(queuedIndex, 1);
+    }
+    if (activeMobilePosters.delete(element)) pumpMobilePosterQueue();
+  };
+}
+
+function finishMobilePosterRequest(element) {
+  if (element && activeMobilePosters.delete(element)) pumpMobilePosterQueue();
+}
+
+function ResponsiveFoldText({ isMobile, text, ...props }) {
+  if (isMobile) return text;
+  return (
+    <Suspense fallback={text}>
+      <FoldText text={text} {...props} />
+    </Suspense>
+  );
+}
+
+function ResponsiveBlurText({ isMobile, as: Tag = "p", text, className = "", ...props }) {
+  const fallback = <Tag className={`blur-text ${className}`.trim()}>{text}</Tag>;
+  if (isMobile) return fallback;
+  return (
+    <Suspense fallback={fallback}>
+      <BlurText as={Tag} text={text} className={className} {...props} />
+    </Suspense>
+  );
+}
+
+function VideoMotionFrame({ isMobile, index, delay, style, children }) {
+  const staticFrame = (
+    <div className="animated-video-list-item" data-index={index} style={style}>
+      <div className="tilted-card-figure">
+        <div className="tilted-card-inner">{children}</div>
+      </div>
+    </div>
+  );
+
+  if (isMobile) return staticFrame;
+  return (
+    <Suspense fallback={staticFrame}>
+      <AnimatedListItem index={index} delay={delay} style={style}>
+        <TiltedCard rotateAmplitude={12} scaleOnHover={1.03}>
+          {children}
+        </TiltedCard>
+      </AnimatedListItem>
+    </Suspense>
+  );
+}
+
+function StaticPageLoader() {
+  return (
+    <div className="page-loader" role="status" aria-live="polite" aria-label="页面正在加载" style={{
+      position: "fixed",
+      inset: 0,
+      zIndex: 10000,
+      display: "grid",
+      placeItems: "center",
+      minHeight: "100dvh",
+      color: "#fff",
+      background: "#000",
+    }}>
+      <span className="page-loader-title" style={{ color: "#fff", fontSize: "clamp(32px, 5vw, 68px)", fontWeight: 700, lineHeight: 1 }}>
+        吴义博作品集
+      </span>
+    </div>
+  );
+}
+
+function MobilePageLoader() {
+  return (
+    <div className="mobile-page-loader" role="status" aria-live="polite" aria-label="页面正在加载">
+      <span>吴义博作品集</span>
+    </div>
+  );
+}
 const playerInfoBlurFrom = { filter: "blur(6px)", opacity: 0, y: 8 };
 const playerInfoBlurTo = [
   { filter: "blur(3px)", opacity: 0.58, y: 3 },
@@ -75,12 +254,11 @@ function saveLocalLikeState(videoId, state) {
 
 const highlights = [
   { label: "ReelShort 短剧", href: "#reelshort", copy: "AIGC 短剧生产与交付" },
-  { label: "AIGC 知识视频", href: "#newtestament", copy: "AI 全素材生成与视觉叙事" },
+  { label: "AIGC 视频与知识视频", href: "#aigc", copy: "AI 全素材生成与视觉叙事" },
   { label: "纪录片学院奖片花", href: "#academy", copy: "纪录片片花剪辑" },
-  { label: "新华社", href: "#xinhua", copy: "长纪录片与主题短视频" },
-  { label: "央视频", href: "#yangshipin", copy: "风物短片策划与剪辑" },
+  { label: "新华社与央视频", href: "#xinhua", copy: "纪实与主题影像" },
   { label: "小米宣传片", href: "#xiaomi", copy: "产品传播内容剪辑" },
-  { label: "课程作业与纪录片", href: "#student", copy: "校园创作与独立纪录片" }
+  { label: "口播视频与课程作品", href: "#student", copy: "口播与校园创作" }
 ];
 
 const works = [
@@ -475,13 +653,110 @@ function schedulePreviewPlayback(video) {
   previewPlayTimer = window.requestAnimationFrame(playNextBatch);
 }
 
+// 作品分区导航。与下方 categories 保持一致，作为顶部锚点入口。
+// 标签取各分区的能力关键词，避免与分区标题重复。
+const HEADER_NAV = [
+  { id: "xinhua", label: "纪实影像" },
+  { id: "reelshort", label: "AIGC 短剧" },
+  { id: "xiaomi", label: "产品传播" },
+  { id: "academy", label: "纪录片片花" },
+  { id: "aigc", label: "AIGC 视频" },
+  { id: "student", label: "校园创作" }
+];
+
 function Header() {
+  const [activeSection, setActiveSection] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // 随滚动高亮当前分区，方便定位，也让导航本身成为进度指示。
+  useEffect(() => {
+    const targets = HEADER_NAV
+      .map((item) => document.getElementById(item.id))
+      .filter(Boolean);
+    if (!targets.length) return undefined;
+
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (visible.length) setActiveSection(visible[0].target.id);
+    }, { rootMargin: "-30% 0px -60% 0px", threshold: 0 });
+
+    targets.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, []);
+
+  // 打开菜单时锁定滚动，避免点击锚点后菜单残留。
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previous; };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isMenuOpen]);
+
+  const closeMenu = () => setIsMenuOpen(false);
+
   return (
     <header className="site-header">
-      <a className="brand" href="#top" aria-label="返回顶部">吴义博作品集</a>
+      <a className="brand" href="#top" aria-label="返回顶部" onClick={closeMenu}>吴义博作品集</a>
+
+      <nav className="header-nav" aria-label="作品分区">
+        {HEADER_NAV.map((item) => (
+          <a
+            key={item.id}
+            href={`#${item.id}`}
+            className={activeSection === item.id ? "is-active" : undefined}
+            aria-current={activeSection === item.id ? "true" : undefined}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
       <div className="header-actions">
-        <a className="soft-button" href="mailto:wu.yibo@foxmail.com">Email</a>
-        <a className="dark-button" href="#works">View Works</a>
+        <a className="soft-button" href="mailto:wu.yibo@foxmail.com">邮件联系</a>
+        <a className="dark-button" href="#works">查看作品</a>
+      </div>
+
+      <button
+        type="button"
+        className="header-menu-button"
+        onClick={() => setIsMenuOpen((open) => !open)}
+        aria-expanded={isMenuOpen}
+        aria-controls="header-mobile-menu"
+        aria-label={isMenuOpen ? "关闭作品导航" : "打开作品导航"}
+      >
+        <span className="header-menu-bar" />
+        <span className="header-menu-bar" />
+      </button>
+
+      <div
+        id="header-mobile-menu"
+        className={`header-mobile-menu${isMenuOpen ? " is-open" : ""}`}
+        hidden={!isMenuOpen}
+      >
+        <nav aria-label="作品分区（移动端）">
+          {HEADER_NAV.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={activeSection === item.id ? "is-active" : undefined}
+              onClick={closeMenu}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        <a className="soft-button" href="mailto:wu.yibo@foxmail.com" onClick={closeMenu}>邮件联系</a>
       </div>
     </header>
   );
@@ -494,6 +769,16 @@ function CrossfadeHeroVideo() {
   const [visibleIndex, setVisibleIndex] = useState(0);
   const [crossfade, setCrossfade] = useState(null);
   const heroSource = getHeroAlphaSource();
+
+  // 装饰性背景视频默认自动播放且不提供控件。
+  // 若用户在系统里开启了「减少动态效果」，则完全不播放、直接呈现静态首帧，
+  // 以免引发不适（WCAG 2.3.3 / prefers-reduced-motion）。
+  const prefersReducedMotion = useMemo(
+    () => typeof window !== "undefined"
+      && typeof window.matchMedia === "function"
+      && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    []
+  );
 
   const beginCrossfade = useCallback((index) => {
     if (index !== activeIndex.current || transitioning.current) return;
@@ -531,15 +816,37 @@ function CrossfadeHeroVideo() {
       .catch(() => { transitioning.current = false; });
   }, []);
 
+  // 「减少动态效果」模式下只呈现静态首帧，不加载也不播放视频源。
+  if (prefersReducedMotion) {
+    return (
+      <div className="hero-video-crossfade">
+        <picture>
+          <source srcSet="/profile/hero-fishbowl-poster.webp" type="image/webp" />
+          <img
+            className="hero-fallback-poster"
+            src="/profile/hero-fishbowl-poster.jpg?v=7"
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+          />
+        </picture>
+      </div>
+    );
+  }
+
   return (
-    <div className="hero-video-crossfade" aria-label="玻璃鱼缸与人像的动态艺术视觉">
+    <div className="hero-video-crossfade">
       {heroSource.fallback && (
-        <img
-          className="hero-fallback-poster"
-          src="/profile/hero-fishbowl-poster.png?v=6"
-          alt=""
-          aria-hidden="true"
-        />
+        <picture>
+          <source srcSet="/profile/hero-fishbowl-poster.webp" type="image/webp" />
+          <img
+            className="hero-fallback-poster"
+            src="/profile/hero-fishbowl-poster.jpg?v=7"
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+          />
+        </picture>
       )}
       {[0, 1].map((index) => (
         <video
@@ -552,6 +859,8 @@ function CrossfadeHeroVideo() {
           playsInline
           loop={false}
           preload="auto"
+          tabIndex={-1}
+          aria-hidden="true"
           onTimeUpdate={() => beginCrossfade(index)}
         />
       ))}
@@ -559,37 +868,47 @@ function CrossfadeHeroVideo() {
   );
 }
 
-function Hero() {
+function Hero({ isMobile }) {
   return (
     <div className="hero-thread-stage">
-      <WebThreads
-        className="hero-web-threads"
-        color1="#a855f7"
-        mouseInteraction={false}
-        pinchPosition={0.36}
-        position={0.58}
-        glow={0.02}
-        falloff={0.6}
-        thickness={0.2}
-        grain={false}
-      />
+      {!isMobile && (
+        <Suspense fallback={null}>
+          <WebThreads
+            className="hero-web-threads"
+            color1="#a855f7"
+            mouseInteraction={false}
+            pinchPosition={0.36}
+            position={0.58}
+            glow={0.02}
+            falloff={0.6}
+            thickness={0.2}
+            grain={false}
+          />
+        </Suspense>
+      )}
       <section className="editor-hero" id="top">
-        <CrossfadeHeroVideo />
+        {!isMobile && <CrossfadeHeroVideo />}
         <div className="hero-intro hero-intro--depth">
-          <h1 className="hero-depth-title"><DepthText className="hero-depth-text" text={"吴义博\n视频作品集"} /></h1>
+          <h1 className="hero-depth-title">
+            {isMobile ? (
+              <span className="hero-depth-text hero-depth-text--static">吴义博<br />视频作品集</span>
+            ) : (
+              <Suspense fallback={<span className="hero-depth-text hero-depth-text--static">吴义博<br />视频作品集</span>}>
+                <DepthText className="hero-depth-text" text={"吴义博\n视频作品集"} />
+              </Suspense>
+            )}
+          </h1>
         </div>
-        <div className="portrait-frame">
-          <img src="/profile/hero-subway.jpg" alt="吴义博在地铁站台的肖像" decoding="async" />
-        </div>
+        {!isMobile && <div className="portrait-frame"><img src="/profile/hero-subway.jpg" alt="吴义博在地铁站台的肖像" decoding="async" /></div>}
       </section>
     </div>
   );
 }
 
 function HeroDivider() {
-  const ribbonText = "VIDEO CREATOR · AIGC · DIRECTING · EDITING ✦ ";
+  const ribbonText = "视频创作者 · AIGC 制作 · 导演 · 剪辑 ✦ ";
   return (
-    <div className="hero-text-loop" aria-label="VIDEO CREATOR · AIGC · DIRECTING · EDITING">
+    <div className="hero-text-loop" aria-label="视频创作者 · AIGC 制作 · 导演 · 剪辑">
       <div className="hero-ribbon-track" aria-hidden="true">
         <span>{ribbonText.repeat(4)}</span>
         <span>{ribbonText.repeat(4)}</span>
@@ -608,21 +927,36 @@ function Stats() {
   );
 }
 
-const AutoplayPreview = memo(function AutoplayPreview({ video }) {
+const AutoplayPreview = memo(function AutoplayPreview({ video, isMobile }) {
   if (video.previewGif) {
     return <img src={video.previewGif} alt="" aria-hidden="true" />;
   }
 
   const videoRef = useRef(null);
+  const previewRef = useRef(null);
+  const setVideoPreviewRef = useCallback((element) => {
+    videoRef.current = element;
+    previewRef.current = element;
+  }, []);
   const [isNearViewport, setIsNearViewport] = useState(false);
+  const [mobilePosterRequested, setMobilePosterRequested] = useState(false);
+  const [mobilePosterVisible, setMobilePosterVisible] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
   const previewSrc = previewFailed
     ? (video.remoteStream ? undefined : video.src)
     : `/previews/${video.id}.mp4`;
 
   useEffect(() => {
-    const element = videoRef.current;
+    const element = previewRef.current;
     if (!element) return undefined;
+
+    if (isMobile) {
+      return observeMobilePoster(
+        element,
+        () => setMobilePosterRequested(true),
+        setMobilePosterVisible,
+      );
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => setIsNearViewport(entry.isIntersecting),
@@ -631,16 +965,16 @@ const AutoplayPreview = memo(function AutoplayPreview({ video }) {
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, []);
+  }, [isMobile, video.id]);
 
   useEffect(() => {
     const element = videoRef.current;
     if (!element) return undefined;
 
-    // Mobile browsers already have a constrained decode budget. Keep the
-    // poster-first gallery treatment there and reserve playback for the video
-    // the visitor explicitly opens.
-    if (window.matchMedia("(max-width: 720px)").matches) {
+    // Mobile browsers already have a constrained decode budget. Keep gallery
+    // cards poster-only there and reserve playback for the video the visitor
+    // explicitly opens.
+    if (isMobile) {
       previewPlayQueue.delete(element);
       element.pause();
       return undefined;
@@ -662,11 +996,34 @@ const AutoplayPreview = memo(function AutoplayPreview({ video }) {
       element.removeEventListener("canplay", keepPlaying);
       element.removeEventListener("pause", keepPlaying);
     };
-  }, [isNearViewport, previewSrc]);
+  }, [isMobile, isNearViewport, previewSrc]);
+
+  if (isMobile) {
+    return (
+      <picture className="mobile-card-poster" ref={previewRef}>
+        <source
+          type="image/webp"
+          srcSet={mobilePosterRequested ? video.mobilePoster : undefined}
+        />
+        <img
+          src={mobilePosterRequested ? video.poster : undefined}
+          alt=""
+          aria-hidden="true"
+          width={video.width}
+          height={video.height}
+          loading="eager"
+          decoding="async"
+          fetchPriority={mobilePosterVisible ? "high" : "low"}
+          onLoad={() => finishMobilePosterRequest(previewRef.current)}
+          onError={() => finishMobilePosterRequest(previewRef.current)}
+        />
+      </picture>
+    );
+  }
 
   return (
     <video
-      ref={videoRef}
+      ref={setVideoPreviewRef}
       src={isNearViewport ? previewSrc : undefined}
       poster={video.poster}
       muted
@@ -680,12 +1037,34 @@ const AutoplayPreview = memo(function AutoplayPreview({ video }) {
   );
 });
 
-function VideoGallery({ title, videos, description, onOpen, hideCaptions = false }) {
+function getFirstRowVideos(videos, isMobile, isNarrow) {
+  const isPortrait = videos.every((video) => video.orientation === "portrait");
+  const count = isPortrait ? (isMobile ? 3 : isNarrow ? 6 : 8) : (isMobile ? 2 : isNarrow ? 3 : 4);
+  return videos.filter((video) => video.orientation === (isPortrait ? "portrait" : "landscape")).slice(0, count);
+}
+
+function VideoGallery({ title, videos, description, onOpen, hideCaptions = false, isMobile = false, visibleVideoIds = null, showExpandButton = true }) {
+  const [expanded, setExpanded] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(() => window.matchMedia("(max-width: 1100px)").matches);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 1100px)");
+    const update = (event) => setIsNarrow(event.matches);
+    setIsNarrow(mediaQuery.matches);
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+
   if (!videos.length) return <div className="gallery-empty">视频封面正在准备中</div>;
 
+  const collapsedVideos = getFirstRowVideos(videos, isMobile, isNarrow);
+  const visibleIds = visibleVideoIds === null
+    ? new Set((expanded ? videos : collapsedVideos).map((video) => video.id))
+    : new Set(visibleVideoIds);
   const landscapeVideos = [];
   const portraitVideos = [];
   videos.forEach((video, index) => {
+    if (!visibleIds.has(video.id)) return;
     const item = { video, index };
     (video.orientation === "portrait" ? portraitVideos : landscapeVideos).push(item);
   });
@@ -701,11 +1080,10 @@ function VideoGallery({ title, videos, description, onOpen, hideCaptions = false
           : video.orientation === "portrait" ? 9 / 16 : 16 / 9;
 
         return (
-        <AnimatedListItem key={video.id} index={index} delay={Math.min(itemIndex * 0.055, 0.22)} style={{
+        <VideoMotionFrame key={video.id} index={index} isMobile={isMobile} delay={Math.min(itemIndex * 0.055, 0.22)} style={{
           "--card-ratio": mediaRatio,
           "--card-ratio-value": mediaRatioValue,
         }}>
-        <TiltedCard rotateAmplitude={12} scaleOnHover={1.03}>
         <figure className={`video-card video-card--${video.id} ${video.orientation} ${hideCaptions || captionlessGalleryVideoIds.has(video.id) ? "video-card--untitled" : "video-card--titled"}`}>
             <button
               className="video-tile"
@@ -714,7 +1092,7 @@ function VideoGallery({ title, videos, description, onOpen, hideCaptions = false
               aria-label={`播放${getDisplayTitle(video)}`}
               style={{ aspectRatio: mediaRatio }}
             >
-              <AutoplayPreview video={video} />
+              <AutoplayPreview video={video} isMobile={isMobile} />
               <span className="tile-shade" aria-hidden="true" />
             </button>
           {!hideCaptions && !captionlessGalleryVideoIds.has(video.id) && (
@@ -725,14 +1103,13 @@ function VideoGallery({ title, videos, description, onOpen, hideCaptions = false
                     <span>中国口述历史国际周入围作品</span><span className="course-04-title-phrase">《郝姐 上京赶集》</span>
                   </>
                 ) : (
-                  <BlurText as="span" text={getDisplayTitle(video)} delay={150} animateBy="words" direction="top" />
+                  <ResponsiveBlurText isMobile={isMobile} as="span" text={getDisplayTitle(video)} delay={150} animateBy="words" direction="top" />
                 )}
               </strong>
             </figcaption>
           )}
         </figure>
-        </TiltedCard>
-        </AnimatedListItem>
+        </VideoMotionFrame>
         );
       })}
     </div>
@@ -742,22 +1119,79 @@ function VideoGallery({ title, videos, description, onOpen, hideCaptions = false
     <div className="video-groups" aria-label={`${title}视频列表`}>
       {landscapeVideos.length > 0 && <div className="video-group landscape-group">{renderVideos(landscapeVideos)}</div>}
       {portraitVideos.length > 0 && <div className="video-group portrait-group">{renderVideos(portraitVideos)}</div>}
+      {showExpandButton && videos.length > collapsedVideos.length && (
+        <button className="gallery-expand-button" type="button" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>
+          {expanded ? "收起视频" : <>展开其余 <span className="gallery-expand-count">{videos.length - collapsedVideos.length}</span> 条视频</>}
+        </button>
+      )}
     </div>
   );
 }
 
-function LabeledGalleryRow({ className = "", title, videos, allVideos, collectionTitle, onOpen }) {
+function SharedFoldGroups({ title, groups, getWorkVideos, onOpen, isMobile, featuredIds = null }) {
+  const [expanded, setExpanded] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(() => window.matchMedia("(max-width: 1100px)").matches);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 1100px)");
+    const update = (event) => setIsNarrow(event.matches);
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+
+  const videoGroups = groups.map((group) => ({
+    ...group,
+    videos: group.ids.flatMap((id) => getWorkVideos(id, group.durationRule))
+      .filter((video) => !group.orientation || video.orientation === group.orientation)
+      .filter((video) => !group.includeIds || group.includeIds.includes(video.id))
+      .filter((video) => !group.excludeIds || !group.excludeIds.includes(video.id))
+  }));
+  const allVideos = videoGroups.flatMap((group) => group.videos);
+  const featuredVideos = featuredIds
+    ? featuredIds.map((id) => allVideos.find((video) => video.id === id)).filter(Boolean)
+    : videoGroups.flatMap((group) => getFirstRowVideos(group.videos, isMobile, isNarrow));
+  const visibleFeaturedVideos = featuredIds && isMobile ? featuredVideos.slice(0, 2) : featuredVideos;
+  const visibleIds = new Set((expanded && !featuredIds ? allVideos : visibleFeaturedVideos).map((video) => video.id));
+  const remainingCount = allVideos.length - visibleFeaturedVideos.length;
+
+  return (
+    <>
+      {featuredIds && <div className="category-gallery">
+        <VideoGallery title={title} videos={visibleFeaturedVideos} isMobile={isMobile} visibleVideoIds={visibleFeaturedVideos.map((video) => video.id)} showExpandButton={false} onOpen={(videoIndex) => onOpen(allVideos, allVideos.findIndex((video) => video.id === visibleFeaturedVideos[videoIndex].id), title)} />
+      </div>}
+      {videoGroups.map((group) => {
+        const videos = group.videos.filter((video) => featuredIds ? expanded && !visibleIds.has(video.id) : visibleIds.has(video.id));
+        if (!videos.length) return null;
+        return <section className={`subcategory subcategory--${group.durationRule || "all"}`} key={group.title}>
+          <h4><ResponsiveFoldText isMobile={isMobile} text={group.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h4>
+          <div className="subcategory-gallery">
+            <VideoGallery title={group.title} videos={videos} isMobile={isMobile} visibleVideoIds={videos.map((video) => video.id)} showExpandButton={false} onOpen={(videoIndex) => onOpen(allVideos, allVideos.findIndex((video) => video.id === videos[videoIndex].id), title)} />
+          </div>
+        </section>;
+      })}
+      {remainingCount > 0 && <button className="gallery-expand-button" type="button" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>
+        {expanded ? "收起视频" : <>展开其余 <span className="gallery-expand-count">{remainingCount}</span> 条视频</>}
+      </button>}
+    </>
+  );
+}
+
+function LabeledGalleryRow({ className = "", title, kicker, videos, allVideos, collectionTitle, onOpen, isMobile = false }) {
   const indexById = new Map(allVideos.map((video, index) => [video.id, index]));
   const titleSplitMode = className.includes("labeled-gallery-row--reelshort") ? "word" : "char";
 
   return (
     <section className={`labeled-gallery-row ${className}`} aria-label={title}>
-      <header className="labeled-gallery-heading"><h3><FoldText text={title} splitBy={titleSplitMode} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h3></header>
+      <header className="labeled-gallery-heading">
+        {kicker && <p className="category-kicker"><span className="category-kicker-no">{kicker}</span></p>}
+        <h3><ResponsiveFoldText isMobile={isMobile} text={title} splitBy={titleSplitMode} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h3>
+      </header>
       <div className="labeled-gallery-media">
         <VideoGallery
           title={title}
           videos={videos}
           hideCaptions={className.includes("labeled-gallery-row--reelshort")}
+          isMobile={isMobile}
           onOpen={(localIndex) => onOpen(allVideos, indexById.get(videos[localIndex].id), collectionTitle)}
         />
       </div>
@@ -765,40 +1199,43 @@ function LabeledGalleryRow({ className = "", title, videos, allVideos, collectio
   );
 }
 
-function WorkSection({ work, videos, onOpen }) {
+function WorkSection({ work, videos, onOpen, isMobile = false }) {
   return (
     <article className={`grid-work grid-work--${work.id}`} data-work-id={work.id}>
       <div className="grid-work-gallery">
-        <VideoGallery title={work.title} videos={videos} description={`${work.client} / ${work.role}`} onOpen={(videoIndex) => onOpen(videos, videoIndex, work.title)} />
+        <VideoGallery title={work.title} videos={videos} description={`${work.client} / ${work.role}`} isMobile={isMobile} onOpen={(videoIndex) => onOpen(videos, videoIndex, work.title)} />
       </div>
     </article>
   );
 }
 
-const Works = memo(function Works({ manifest, onOpen }) {
+const Works = memo(function Works({ manifest, onOpen, isMobile = false }) {
   const categories = [
-    { id: "xinhua", title: "新华社", kicker: "01 / 纪实与主题影像", subgroups: [
+    // kicker 统一为「编号 / 体例说明」，标题另起一行。
+    // 编号连续且在页面上可见（此前 kicker 从未渲染，导致 04 看不到）。
+    { id: "xinhua", title: "新华社与央视频", kicker: "01 / 纪实与主题影像", featuredIds: ["course-02", "palace-02", "xiangxin-01", "xinhua-02"], subgroups: [
       { title: "长纪录片", durationRule: "long", ids: ["xinhua", "tibet", "xiangxin"] },
-      { title: "短视频", durationRule: "short", ids: ["yangsheng-xinhua", "xinhua-more", "xinhua-animation", "xinhua", "xiangxin", "tibet"] }
+      { title: "短视频", durationRule: "short", ids: ["yangsheng-xinhua", "xinhua-more", "xinhua-animation", "xinhua", "xiangxin", "tibet"] },
+      { title: "央视频", ids: ["guangxi"] }
     ] },
+    { id: "reelshort", title: "ReelShort 短剧", kicker: "02 / AIGC 短剧制作", ids: ["ai"] },
+    { id: "xiaomi", title: "小米宣传片", kicker: "03 / 产品传播内容", ids: ["commercial"] },
     {
       id: "academy",
       title: "纪录片学院奖片花",
-      heading: "第十五届“光影纪年”中国纪录片学院奖片花",
-      kicker: "02 / 纪录片片花",
+      // 原 heading 与 kicker 同义，标题改为更明确的表述
+      heading: "中国纪录片学院奖官方片花",
+      kicker: "04 / 纪录片片花",
       ids: ["academy"]
     },
-    { id: "aigc", title: "AIGC视频", kicker: "03 / AIGC 视频制作", ids: ["ai"] },
-    {
-      id: "newtestament",
-      title: "AIGC 知识视频",
-      kicker: "04 / AI 全素材生成与视觉叙事",
-      ids: ["newtestament"]
-    },
-    { id: "reelshort", title: "ReelShort 短剧", kicker: "05 / AIGC 短剧制作", ids: ["ai"] },
-    { id: "yangshipin", title: "央视频", kicker: "06 / 风物与品牌影像", ids: ["guangxi"] },
-    { id: "xiaomi", title: "小米宣传片", kicker: "07 / 产品传播内容", ids: ["commercial"] },
-    { id: "student", title: "课程作业与纪录片", kicker: "08 / 校园创作与独立纪录片", ids: ["student"] }
+    { id: "aigc", title: "AIGC 视频与知识视频", kicker: "05 / AIGC 视频制作", subgroups: [
+      { title: "AIGC 视频", ids: ["ai"], orientation: "landscape" },
+      { title: "AIGC 知识视频", ids: ["newtestament"], excludeIds: ["yiyan-nanjing"] }
+    ] },
+    { id: "student", title: "口播视频与课程作业", kicker: "06 / 口播与校园创作", subgroups: [
+      { title: "口播视频", ids: ["newtestament"], includeIds: ["yiyan-nanjing"] },
+      { title: "课程作业与纪录片", ids: ["student"] }
+    ] }
   ];
 
   const getWorkVideos = (id, durationRule) => getWorkVideosForDisplay(manifest, id, durationRule);
@@ -806,21 +1243,7 @@ const Works = memo(function Works({ manifest, onOpen }) {
   const renderGallery = (ids, durationRule, title) => {
     const videos = ids.flatMap((id) => getWorkVideos(id, durationRule));
     if (!videos.length) return null;
-    return <VideoGallery title={title} videos={videos} onOpen={(videoIndex) => onOpen(videos, videoIndex, title)} />;
-  };
-
-  const renderAigcRow = () => {
-    const videos = getWorkVideos("ai");
-    return (
-      <LabeledGalleryRow
-        className="labeled-gallery-row--aigc"
-        title="AIGC视频"
-        videos={videos.filter((video) => video.orientation !== "portrait")}
-        allVideos={videos}
-        collectionTitle="AIGC视频"
-        onOpen={onOpen}
-      />
-    );
+    return <VideoGallery title={title} videos={videos} isMobile={isMobile} onOpen={(videoIndex) => onOpen(videos, videoIndex, title)} />;
   };
 
   const renderReelshortRow = () => {
@@ -829,40 +1252,13 @@ const Works = memo(function Works({ manifest, onOpen }) {
       <LabeledGalleryRow
         className="labeled-gallery-row--reelshort"
         title="ReelShort 短剧"
+        kicker="02"
         videos={videos.filter((video) => video.orientation === "portrait")}
         allVideos={videos}
         collectionTitle="ReelShort 短剧"
+        isMobile={isMobile}
         onOpen={onOpen}
       />
-    );
-  };
-
-  const renderKnowledgeRows = (category) => {
-    const videos = getWorkVideos("newtestament");
-    const oralVideo = videos.filter((video) => video.id === "yiyan-nanjing");
-    const knowledgeVideos = videos.filter((video) => video.id !== "yiyan-nanjing");
-    return (
-      <>
-        <section className="knowledge-video-row">
-          <header className="category-heading">
-            <h3><FoldText text={category.heading || category.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h3>
-            {category.description && <p>{category.description}</p>}
-          </header>
-          <div className="category-content">
-          <div className="knowledge-gallery category-gallery">
-            <VideoGallery title="AIGC 知识视频" videos={knowledgeVideos} onOpen={(videoIndex) => onOpen(videos, videoIndex, "AIGC 知识视频")} />
-            </div>
-          </div>
-        </section>
-        <LabeledGalleryRow
-          className="labeled-gallery-row--oral"
-          title="口播视频"
-          videos={oralVideo}
-          allVideos={videos}
-          collectionTitle="AIGC 知识视频"
-          onOpen={onOpen}
-        />
-      </>
     );
   };
 
@@ -870,20 +1266,28 @@ const Works = memo(function Works({ manifest, onOpen }) {
     <section className="editor-works" id="works">
       {categories.map((category) => (
         <section className={`chapter category-section category-section--${category.id}`} id={category.id} key={category.id}>
-          {category.id !== "aigc" && category.id !== "reelshort" && category.id !== "newtestament" && <header className="category-heading">
-            <h3><FoldText text={category.heading || category.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h3>
-            {category.description && <p>{category.description}</p>}
+          {category.id === "xinhua" && <span id="yangshipin" className="category-anchor" aria-hidden="true" />}
+          {category.id === "aigc" && <span id="newtestament" className="category-anchor" aria-hidden="true" />}
+          {category.id !== "reelshort" && <header className="category-heading">
+            {category.kicker && (
+              <p className="category-kicker">
+                <span className="category-kicker-no">{category.kicker.split("/")[0].trim()}</span>
+                <span className="category-kicker-label">{category.kicker.split("/").slice(1).join("/").trim()}</span>
+              </p>
+            )}
+            <h3><ResponsiveFoldText isMobile={isMobile} text={category.heading || category.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h3>
+            {category.description && <p className="category-description">{category.description}</p>}
           </header>}
-          {category.id === "newtestament" ? renderKnowledgeRows(category) : <div className="category-content">
-            {category.id === "aigc" ? renderAigcRow() : category.id === "reelshort" ? renderReelshortRow() : category.subgroups ? category.subgroups.map((group) => <section className={`subcategory subcategory--${group.durationRule || "all"}`} key={group.title}><h4><FoldText text={group.title} trigger="scroll" fontSize="inherit" fontWeight="inherit" color="currentColor" /></h4><div className="subcategory-gallery">{renderGallery(group.ids, group.durationRule, group.title)}</div></section>) : <div className="category-gallery">{renderGallery(category.ids, undefined, category.title)}</div>}
-          </div>}
+          <div className="category-content">
+            {category.id === "reelshort" ? renderReelshortRow() : category.subgroups ? <SharedFoldGroups title={category.title} groups={category.subgroups} featuredIds={category.featuredIds} getWorkVideos={getWorkVideos} onOpen={onOpen} isMobile={isMobile} /> : <div className="category-gallery">{renderGallery(category.ids, undefined, category.title)}</div>}
+          </div>
         </section>
       ))}
     </section>
   );
 });
 
-function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
+function VideoModal({ viewer, isClosing, onClose, onChange, onExited, isMobile = false }) {
   const [failed, setFailed] = useState(false);
   const [sourceIndex, setSourceIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -907,9 +1311,14 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
   const details = getVideoDetails(video);
   const hidePlayerSummary = hidesPlayerSummary(video.id);
   const hidePlayerTitle = hidesPlayerTitle(video.id);
+  const proxyPlaybackSrc = `/api/video/${encodeURIComponent(video.id)}?mapping=2`;
   const playbackSources = video.remoteStream
     ? [video.src, `/previews/${video.id}.mp4`]
-    : [`/api/video/${video.id}?mapping=2`, `/previews/${video.id}.mp4`];
+    : [
+      `${proxyPlaybackSrc}&delivery=direct`,
+      proxyPlaybackSrc,
+      `/previews/${video.id}.mp4`
+    ];
   const playbackSrc = playbackSources[sourceIndex];
   const previousIndex = (index - 1 + videos.length) % videos.length;
   const nextIndex = (index + 1) % videos.length;
@@ -1229,7 +1638,8 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
         <section className={`player-detail-panel${hidePlayerTitle ? " player-detail-panel--title-hidden" : ""}`} aria-label="作品信息">
           {!hidePlayerTitle && (
             <h2 id="video-modal-title">
-              <BlurText
+              <ResponsiveBlurText
+                isMobile={isMobile}
                 key={`player-title-${video.id}`}
                 as="span"
                 text={getDisplayTitle(video)}
@@ -1241,12 +1651,18 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
               />
             </h2>
           )}
+          {!hidePlayerTitle && video.originalCaption && (
+            <details className="player-original-caption">
+              <summary>原发布文案</summary>
+              <p>{video.originalCaption}</p>
+            </details>
+          )}
           <div className="player-detail-row">
             <div className="player-creator">
               <span className="player-avatar"><img src="/wa-logo.png" alt="" /></span>
               <span>
-                <BlurText key={`player-author-${video.id}`} as="strong" text="吴义博" animateBy="letters" delay={22} stepDuration={0.16} animationFrom={playerInfoBlurFrom} animationTo={playerInfoBlurTo} />
-                <BlurText key={`player-role-${video.id}`} as="small" text={video.metaDescription || collectionTitle} animateBy="letters" delay={12} stepDuration={0.16} animationFrom={playerInfoBlurFrom} animationTo={playerInfoBlurTo} />
+                <ResponsiveBlurText isMobile={isMobile} key={`player-author-${video.id}`} as="strong" text="吴义博" animateBy="letters" delay={22} stepDuration={0.16} animationFrom={playerInfoBlurFrom} animationTo={playerInfoBlurTo} />
+                <ResponsiveBlurText isMobile={isMobile} key={`player-role-${video.id}`} as="small" text={video.metaDescription || collectionTitle} animateBy="letters" delay={12} stepDuration={0.16} animationFrom={playerInfoBlurFrom} animationTo={playerInfoBlurTo} />
               </span>
               <a className={`player-contact-button${isContactAnimating ? " is-animating" : ""}`} href="mailto:wu.yibo@foxmail.com" onClick={() => setIsContactAnimating(true)} onAnimationEnd={() => setIsContactAnimating(false)}>联系</a>
             </div>
@@ -1267,7 +1683,8 @@ function VideoModal({ viewer, isClosing, onClose, onChange, onExited }) {
               <span>{video.orientation === "portrait" ? "竖版影像" : "横版影像"}</span>
               {details.award && <span>{details.award}</span>}
             </div>
-            <BlurText
+            <ResponsiveBlurText
+              isMobile={isMobile}
               key={`player-description-${video.id}`}
               text={details.description || video.projectDescription || "视频作品选集，记录从创意、素材到成片的影像实践。"}
               animateBy="letters"
@@ -1288,14 +1705,14 @@ function ResearchBlock() {
   return (
     <section className="research-block">
       <div>
-        <p className="eyebrow">Practice Thesis</p>
+        <p className="eyebrow">创作主张</p>
         <h2>影像创作不是单点技能，而是一套从系统、素材到叙事节奏的协同能力。</h2>
         <a className="outline-button" href="#contact">联系合作</a>
       </div>
       <div className="research-list">
-        <a href="#ai"><span>AIGC Production</span><small>文生图、图生视频、AI 配音与短剧返修交付</small><ArrowRight size={16} /></a>
-        <a href="#xinhua"><span>Documentary Editing</span><small>央媒纪实项目的后期策划、剪辑与平台传播</small><ArrowRight size={16} /></a>
-        <a href="#commercial"><span>Broadcast Systems</span><small>亿元级广电系统集成经验带来的工程化执行力</small><ArrowRight size={16} /></a>
+        <a href="#reelshort"><span>AIGC 全流程制作</span><small>文生图、图生视频、AI 配音与短剧返修交付</small><ArrowRight size={16} /></a>
+        <a href="#xinhua"><span>纪实影像剪辑</span><small>央媒纪实项目的后期策划、剪辑与平台传播</small><ArrowRight size={16} /></a>
+        <a href="#xiaomi"><span>广电系统集成</span><small>亿元级广电系统集成经验带来的工程化执行力</small><ArrowRight size={16} /></a>
       </div>
     </section>
   );
@@ -1317,60 +1734,106 @@ function Experience() {
   );
 }
 
-function FooterDecrypt({ text, delay = 0 }) {
-  return <DecryptedText text={text} delay={Math.round(delay * 0.4)} speed={28} encryptedClassName="footer-decrypt-encrypted" />;
+function FooterDecrypt({ text, delay = 0, isMobile = false }) {
+  if (isMobile) return text;
+  return (
+    <Suspense fallback={<span>{text}</span>}>
+      <DecryptedText text={text} delay={Math.round(delay * 0.4)} speed={28} encryptedClassName="footer-decrypt-encrypted" />
+    </Suspense>
+  );
 }
 
-function Footer() {
+function FooterLogoImage({ isMobile }) {
+  const imageRef = useRef(null);
+  const [shouldLoad, setShouldLoad] = useState(!isMobile);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setShouldLoad(true);
+      return undefined;
+    }
+
+    const image = imageRef.current;
+    if (!image || typeof IntersectionObserver === "undefined") {
+      setShouldLoad(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) return;
+      setShouldLoad(true);
+      observer.disconnect();
+    }, { rootMargin: "160px" });
+    observer.observe(image);
+    return () => observer.disconnect();
+  }, [isMobile]);
+
+  return (
+    <img
+      ref={imageRef}
+      className="footer-logo-image footer-logo-fallback"
+      src={shouldLoad ? "/wa-logo.png" : undefined}
+      alt=""
+      loading={isMobile ? "lazy" : undefined}
+      decoding="async"
+    />
+  );
+}
+
+function Footer({ isMobile = false }) {
   return (
     <footer className="editor-footer" id="contact">
       <div className="footer-main">
         <div className="footer-brand">
           <a href="#top" className="footer-logo" aria-label="返回顶部">
             <span className="footer-logo-metallic" aria-hidden="true">
-              <img className="footer-logo-image footer-logo-fallback" src="/wa-logo.png" alt="" />
-              <MetallicPaint
-                imageSrc="/wa-logo.png"
-                seed={42}
-                scale={4}
-                patternSharpness={1}
-                noiseScale={0.5}
-                speed={0.3}
-                liquid={0.75}
-                mouseAnimation={false}
-                brightness={2}
-                contrast={0.5}
-                refraction={0.01}
-                blur={0.015}
-                chromaticSpread={2}
-                fresnel={1}
-                angle={0}
-                waveAmplitude={1}
-                distortion={1}
-                contour={0.2}
-                lightColor="#ffffff"
-                darkColor="#000000"
-                tintColor="#feb3ff"
-              />
+              <FooterLogoImage isMobile={isMobile} />
+              {!isMobile && (
+                <Suspense fallback={null}>
+                  <MetallicPaint
+                    imageSrc="/wa-logo.png"
+                    seed={42}
+                    scale={4}
+                    patternSharpness={1}
+                    noiseScale={0.5}
+                    speed={0.3}
+                    liquid={0.75}
+                    mouseAnimation={false}
+                    brightness={2}
+                    contrast={0.5}
+                    refraction={0.01}
+                    blur={0.015}
+                    chromaticSpread={2}
+                    fresnel={1}
+                    angle={0}
+                    waveAmplitude={1}
+                    distortion={1}
+                    contour={0.2}
+                    lightColor="#ffffff"
+                    darkColor="#000000"
+                    tintColor="#feb3ff"
+                  />
+                </Suspense>
+              )}
             </span>
-            <FooterDecrypt text="吴义博" delay={180} />
+            <FooterDecrypt isMobile={isMobile} text="吴义博" delay={180} />
           </a>
-          <p><FooterDecrypt text="视频创作者与 AIGC 内容制作者，覆盖策划、拍摄、剪辑及从创意到交付的完整制作流程。" delay={520} /></p>
+          <p><FooterDecrypt isMobile={isMobile} text="视频创作者与 AIGC 内容制作者，覆盖策划、拍摄、剪辑及从创意到交付的完整制作流程。" delay={520} /></p>
         </div>
 
         <div className="footer-contact-grid">
-          <div><strong><FooterDecrypt text="Location" delay={340} /></strong><span><FooterDecrypt text="中国 · 北京" delay={700} /></span><span><FooterDecrypt text="支持线上办公" delay={1040} /></span></div>
-          <div><strong><FooterDecrypt text="Email Address" delay={460} /></strong><a href="mailto:wu.yibo@foxmail.com"><FooterDecrypt text="wu.yibo@foxmail.com" delay={980} /></a></div>
-          <div><strong><FooterDecrypt text="Phone Number" delay={580} /></strong><a href="tel:18800102979"><FooterDecrypt text="18800102979" delay={1220} /></a><span><FooterDecrypt text="微信同号" delay={1580} /></span></div>
+          <div><strong><FooterDecrypt isMobile={isMobile} text="所在地区" delay={340} /></strong><span><FooterDecrypt isMobile={isMobile} text="中国 · 北京" delay={700} /></span><span><FooterDecrypt isMobile={isMobile} text="支持线上办公" delay={1040} /></span></div>
+          <div><strong><FooterDecrypt isMobile={isMobile} text="电子邮箱" delay={460} /></strong><a href="mailto:wu.yibo@foxmail.com"><FooterDecrypt isMobile={isMobile} text="wu.yibo@foxmail.com" delay={980} /></a></div>
+          <div><strong><FooterDecrypt isMobile={isMobile} text="联系电话" delay={580} /></strong><a href="tel:18800102979"><FooterDecrypt isMobile={isMobile} text="18800102979" delay={1220} /></a><span><FooterDecrypt isMobile={isMobile} text="微信同号" delay={1580} /></span></div>
         </div>
       </div>
 
       <div className="footer-lower">
-        <span><FooterDecrypt text="© 2026 吴义博 · All rights reserved" delay={1280} /></span>
+        <span><FooterDecrypt isMobile={isMobile} text="© 2026 吴义博 · 版权所有" delay={1280} /></span>
         <nav aria-label="页脚导航">
-          <a href="#works"><FooterDecrypt text="作品" delay={1500} /></a>
-          <a href="#contact"><FooterDecrypt text="联系" delay={1640} /></a>
-          <a href="#top"><FooterDecrypt text="返回顶部" delay={1780} /></a>
+          <a href="#works"><FooterDecrypt isMobile={isMobile} text="作品" delay={1500} /></a>
+          <a href="#contact"><FooterDecrypt isMobile={isMobile} text="联系" delay={1640} /></a>
+          <a href="#top"><FooterDecrypt isMobile={isMobile} text="返回顶部" delay={1780} /></a>
         </nav>
       </div>
     </footer>
@@ -1378,8 +1841,9 @@ function Footer() {
 }
 
 function App() {
+  const isMobile = useMobileViewport();
   const [manifest, setManifest] = useState({});
-  const [manifestReady, setManifestReady] = useState(true);
+  const [manifestReady, setManifestReady] = useState(false);
   const [pageReady, setPageReady] = useState(false);
   const [viewer, setViewer] = useState(null);
   const [isViewerClosing, setIsViewerClosing] = useState(false);
@@ -1406,6 +1870,21 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (isMobile) return undefined;
+    let idleId;
+    let timeoutId;
+    const preloadPlayerBackground = () => import("./components/ui/MagicRings");
+
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(preloadPlayerBackground, { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(idleId);
+    }
+
+    timeoutId = window.setTimeout(preloadPlayerBackground, 1800);
+    return () => window.clearTimeout(timeoutId);
+  }, [isMobile]);
+
+  useEffect(() => {
     if (!manifestReady || viewer) return;
     const videoId = new URLSearchParams(window.location.search).get("video");
     if (!videoId) return;
@@ -1422,6 +1901,12 @@ function App() {
   }, [viewer]);
 
   useEffect(() => {
+    if (isMobile) {
+      setPageReady(true);
+      return undefined;
+    }
+
+    setPageReady(false);
     let cancelled = false;
     const minimumDisplay = new Promise((resolve) => window.setTimeout(resolve, 700));
     const windowLoaded = document.readyState === "complete"
@@ -1448,7 +1933,16 @@ function App() {
       cancelled = true;
       window.clearTimeout(safetyTimer);
     };
-  }, []);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile && !manifestReady) {
+      document.documentElement.classList.add("is-page-loading");
+      return () => document.documentElement.classList.remove("is-page-loading");
+    }
+    document.documentElement.classList.remove("is-page-loading");
+    return undefined;
+  }, [isMobile, manifestReady]);
 
   const openViewer = useCallback((videos, index, collectionTitle) => {
     if (!videos.length) return;
@@ -1485,21 +1979,33 @@ function App() {
 
   return (
     <>
-      <HalftoneDotsBackground />
-      <PageLoader visible={!pageReady} />
+      {!isMobile && (
+        <Suspense fallback={null}>
+          <HalftoneDotsBackground />
+        </Suspense>
+      )}
+      {isMobile ? (
+        !manifestReady && <MobilePageLoader />
+      ) : (
+        <Suspense fallback={!pageReady ? <StaticPageLoader /> : null}>
+          <PageLoader visible={!pageReady} />
+        </Suspense>
+      )}
       <Header />
       <main>
-        <Hero />
+        <Hero isMobile={isMobile} />
         <HeroDivider />
-        <Works manifest={manifest} onOpen={openViewer} />
+        <Works manifest={manifest} onOpen={openViewer} isMobile={isMobile} />
       </main>
-      <Footer />
-      <div className={`player-rings-layer${viewer ? " is-active" : ""}${isViewerClosing ? " is-closing" : ""}`} aria-hidden="true">
-        <Suspense fallback={null}>
-          <MagicRings active={Boolean(viewer)} />
-        </Suspense>
-      </div>
-      {viewer && <VideoModal viewer={viewer} isClosing={isViewerClosing} onClose={closeViewer} onChange={changeVideo} onExited={finishClosingViewer} />}
+      <Footer isMobile={isMobile} />
+      {!isMobile && viewer && (
+        <div className={`player-rings-layer is-active${isViewerClosing ? " is-closing" : ""}`} aria-hidden="true">
+          <Suspense fallback={null}>
+            <MagicRings active={!isViewerClosing} />
+          </Suspense>
+        </div>
+      )}
+      {viewer && <VideoModal viewer={viewer} isClosing={isViewerClosing} onClose={closeViewer} onChange={changeVideo} onExited={finishClosingViewer} isMobile={isMobile} />}
     </>
   );
 }

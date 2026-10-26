@@ -1,10 +1,44 @@
+/* ============================================================
+   styles.css — 历史主体样式
+
+   ⚠️ 结构说明（改动前请先读这段）
+
+   本文件是长期迭代叠加的结果，**不是**按区块组织的，而是按时间顺序
+   追加覆盖：文件里有近百段「Final / Final pass」类注释，同一选择器
+   往往被后续段落反复改写。按规则块统计，重复最多的选择器：
+
+       .site-header      10 次      .video-modal         8 次
+       :root              7 次      .editor-footer       7 次
+       .editor-hero       6 次      .category-section    5 次
+
+   全文件另有 515 处 !important、1417 个规则块、15 种断点。
+
+   因此：
+   1. **顺序即语义。** 移动或删除任何一段都可能静默改变最终样式，
+      改动后必须用浏览器实测（agent-browser eval 量 computed style），
+      不能只看构建是否通过。
+   2. **不要试图在文件内重排。** 已抽离的增量样式放在独立文件，
+      由 main.jsx 在本文件之后 import，保证层叠顺序可控：
+        - header-nav.css        Header 三栏布局 + 分区导航 + 汉堡菜单
+        - category-kicker.css   分区编号 01–06
+        - player-caption.css    弹窗「原发布文案」折叠区
+   3. **新增样式优先写进上述独立文件**，不要再追加到本文件末尾。
+   4. 断点不统一：主要用 720px / 721px，另有 1024px、900px、600px 等
+      历史断点共 16 种。改断点前先确认命中的是哪几段。
+
+   审计脚本：python3 scripts/css-audit.py
+   ============================================================ */
 
 
 
 
+
+/* 字体子集：仅保留全站实际使用的字符（818 汉字 + 标点），
+   由 fontTools subset 生成。原始文件见 public/fonts/original-backup-20261008/。
+   如需新增文案字符，请重新生成子集，勿直接改用系统字体回退。 */
 @font-face {
   font-family: "Anton Local";
-  src: url("/fonts/Anton-Regular.ttf") format("truetype");
+  src: url("/fonts/Anton-Regular.woff2") format("woff2");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -20,7 +54,7 @@
 
 @font-face {
   font-family: "Alibaba PuHuiTi 2.0 Black";
-  src: url("/fonts/Alibaba-PuHuiTi-2.0-115-Black.ttf") format("truetype");
+  src: url("/fonts/Alibaba-PuHuiTi-2.0-115-Black.woff2") format("woff2");
   font-style: normal;
   font-weight: 900;
   font-display: swap;
@@ -28,26 +62,23 @@
 
 @font-face {
   font-family: "Source Han Sans Heavy";
-  src: url("/fonts/SourceHanSansCN-Heavy.otf") format("opentype");
+  src: url("/fonts/SourceHanSansCN-Heavy.woff2") format("woff2");
   font-style: normal;
   font-weight: 900;
-  font-display: block;
+  font-display: swap;
 }
-
-
-
 
 @font-face {
   font-family: "Source Han Sans Medium";
-  src: url("/fonts/SourceHanSansCN-Medium.otf") format("opentype");
+  src: url("/fonts/SourceHanSansCN-Medium.woff2") format("woff2");
   font-style: normal;
   font-weight: 500;
-  font-display: block;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "Source Han Sans Regular";
-  src: url("/fonts/SourceHanSansCN-Regular.otf") format("opentype");
+  src: url("/fonts/SourceHanSansCN-Regular.woff2") format("woff2");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -55,7 +86,7 @@
 
 @font-face {
   font-family: "IdeaFonts DunDun 95";
-  src: url("/fonts/IdeaFonts-DunDun-95.ttf") format("truetype");
+  src: url("/fonts/IdeaFonts-DunDun-95.woff2") format("woff2");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -3613,7 +3644,7 @@ footer p {
 .category-section .portrait-group .video-tile {
   width: 100%;
   height: auto;
-  aspect-ratio: auto !important;
+  aspect-ratio: var(--card-ratio) !important;
 }
 
 .category-section .portrait-group .video-tile img {
@@ -6531,7 +6562,7 @@ body,
 /* Player text: Chinese in Source Han Sans Medium, Latin glyphs in Alibaba PuHuiTi. */
 @font-face {
   font-family: "Video Player Type";
-  src: url("/fonts/SourceHanSansCN-Medium.otf") format("opentype");
+  src: url("/fonts/SourceHanSansCN-Medium.woff2") format("woff2");
   font-style: normal;
   font-weight: 500;
   font-display: block;
@@ -7048,6 +7079,7 @@ html[data-video-switch-layout="same-orientation"][data-video-switch-direction="p
 
 .video-modal .player-project-summary > .blur-text {
   display: flex;
+  flex-wrap: wrap;
   line-height: inherit;
 }
 
@@ -7260,7 +7292,8 @@ body,
   #works .video-card--course-04 .video-caption strong { font-size: clamp(10px, 2.9vw, 12px); }
   .video-groups, .split-category-gallery { gap: 28px !important; }
 
-  .video-modal { display: block !important; overflow-y: auto; overscroll-behavior: contain; padding: max(62px, calc(env(safe-area-inset-top) + 54px)) 44px max(28px, env(safe-area-inset-bottom)) !important; }
+  .video-modal { display: block !important; overflow-y: auto; overscroll-behavior: contain; padding: max(62px, calc(env(safe-area-inset-top) + 54px)) 44px max(28px, env(safe-area-inset-bottom)) !important; background: transparent !important; }
+  .video-modal::before { position: fixed; inset: 0; z-index: 0; content: ""; pointer-events: none; background: rgba(0, 0, 0, .68); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
   .video-modal > .modal-shell, .video-modal > .modal-shell.landscape, .video-modal > .modal-shell.portrait { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: auto auto !important; width: min(100%, 560px) !important; max-width: none !important; height: auto !important; min-height: 0; margin: 0 auto; gap: 18px !important; }
   .video-modal > .modal-shell .spatial-main, .video-modal > .modal-shell .player-detail-panel { grid-column: 1 !important; width: 100% !important; margin: 0 !important; }
   .video-modal > .modal-shell .spatial-main { grid-row: 1 !important; }
@@ -7291,9 +7324,9 @@ body,
    Hero film, and keep every gallery title inside its own media module. */
 @media (max-width: 720px) {
   .hero-thread-stage .editor-hero {
-    height: 108px !important;
-    min-height: 108px;
-    max-height: 108px;
+    height: 122px !important;
+    min-height: 122px;
+    max-height: 122px;
     aspect-ratio: auto;
     background: linear-gradient(135deg, #38040e, #640d14) !important;
   }
@@ -7377,5 +7410,76 @@ body,
     max-inline-size: 100% !important;
     max-block-size: 100% !important;
     margin: 0 !important;
+  }
+}
+
+/* Keep the phone's first render independent from the bundled desktop typefaces
+   and decorative animation styles. Desktop typography and effects stay intact. */
+@media (max-width: 720px) {
+  html:root:root:root #root *,
+  html:root:root:root #root *::before,
+  html:root:root:root #root *::after {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+  }
+
+  html.is-page-loading,
+  html.is-page-loading body {
+    overflow: hidden;
+  }
+
+  .mobile-page-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: grid;
+    place-items: center;
+    width: 100vw;
+    height: 100dvh;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    color: #fff;
+    background: #000;
+  }
+
+  .mobile-page-loader span {
+    font-size: clamp(30px, 9vw, 42px);
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .editor-hero .hero-depth-text--static {
+    display: block;
+    width: max-content;
+    color: #fff !important;
+    font-size: clamp(28px, 9vw, 40px) !important;
+    font-weight: 800 !important;
+    line-height: 1.12 !important;
+    letter-spacing: -.035em !important;
+    white-space: normal;
+    text-shadow: none !important;
+  }
+
+  #works .animated-video-list-item,
+  #works .tilted-card-figure,
+  #works .tilted-card-inner {
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    aspect-ratio: auto;
+    perspective: none;
+    transform: none !important;
+    transform-style: flat;
+    will-change: auto;
+    transition: none !important;
+  }
+
+  .video-modal,
+  .video-modal .spatial-main,
+  .video-modal .spatial-close,
+  .video-modal .player-switch,
+  .video-modal .player-detail-panel {
+    animation: none !important;
+    transition: none !important;
   }
 }

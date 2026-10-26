@@ -19,7 +19,7 @@ const renderWhitespace = (value, key) => value.split(/(\n)/).map((part, index) =
 });
 
 function FoldText({
-  text = "Design unfolds", splitBy = "char", hinge = "top", duration = 0.65,
+  text = "影像叙事", splitBy = "char", hinge = "top", duration = 0.65,
   stagger = 0.045, ease = "power3.out", perspective = 700,
   creaseShading = 0.55, trigger = "mount", fontSize = 80,
   fontWeight = 800, color = "#f7f2e8", className = "", style = {}

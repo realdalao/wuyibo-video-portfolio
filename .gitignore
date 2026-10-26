@@ -7,3 +7,17 @@ skills-lock.json
 .DS_Store
 *.log
 .env.local
+.dev.vars*
+
+# 字体原始备份（33MB，仅本地保留，供 scripts/subset_fonts.py 重新生成子集）
+public/fonts/original-backup-*/
+# 字体子集化脚本的中间产物与字符集缓存
+scripts/.fonts-staging/
+scripts/.font-charset.txt
+# 临时备份
+*.bak-*
+
+work/
+.env
+.env.*
+.edgeone

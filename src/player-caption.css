@@ -1,0 +1,73 @@
+/* ============================================================
+   作品原发布文案（折叠展示）
+
+   数据源 originalCaption 存的是各平台原始发布文案，仅作溯源参考，
+   默认收起。字体栈追加系统字体，用于兜底子集未收录的字符。
+   ============================================================ */
+.player-original-caption {
+  margin: 10px 0 0;
+  max-width: 62ch;
+}
+
+.player-original-caption > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 0;
+  cursor: pointer;
+  list-style: none;
+  color: rgba(255, 255, 255, 0.52);
+  font-family: "Source Han Sans Regular", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  line-height: 1.6;
+  transition: color 180ms ease;
+}
+
+.player-original-caption > summary::-webkit-details-marker {
+  display: none;
+}
+
+.player-original-caption > summary::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 180ms ease;
+}
+
+.player-original-caption[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.player-original-caption > summary:hover,
+.player-original-caption > summary:focus-visible {
+  color: #fff;
+}
+
+.player-original-caption > summary:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: 3px;
+}
+
+.player-original-caption > p {
+  margin: 8px 0 0;
+  padding-left: 9px;
+  border-left: 2px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.56);
+  /* 全部文案已统一为简体；系统字体仅作子集缺字兜底 */
+  font-family: "Source Han Sans Regular", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  font-synthesis: none;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player-original-caption > summary,
+  .player-original-caption > summary::before {
+    transition: none;
+  }
+}

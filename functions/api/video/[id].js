@@ -1,6 +1,7 @@
 import { FEISHU_VIDEO_SOURCES } from "../../_lib/video-sources.js";
 
 const FEISHU_API = "https://open.feishu.cn/open-apis";
+const FEISHU_MEDIA_TMP_URL_API = `${FEISHU_API}/drive/v1/medias/batch_get_tmp_download_url`;
 const PASSTHROUGH_HEADERS = [
   "accept-ranges",
   "cache-control",
@@ -87,5 +88,72 @@ async function streamVideo(context) {
   }
 }
 
-export const onRequestGet = streamVideo;
-export const onRequestHead = streamVideo;
+async function redirectVideoToFeishu(context) {
+  const source = FEISHU_VIDEO_SOURCES[context.params.id];
+  if (!source) return new Response("Video source not configured", { status: 404 });
+  if (source.kind !== "media") {
+    return new Response("Direct Feishu delivery is unavailable for this source", { status: 502 });
+  }
+
+  try {
+    const accessToken = await getAccessToken(context.env);
+    const endpoint = new URL(FEISHU_MEDIA_TMP_URL_API);
+    endpoint.searchParams.set("file_tokens", source.token);
+
+    const response = await fetch(endpoint, {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+        accept: "application/json"
+      }
+    });
+    const result = await response.json();
+    if (!response.ok || result.code !== 0) {
+      throw new Error(`Feishu temporary URL request failed (${result.code || response.status})`);
+    }
+
+    const temporaryUrl = result.data?.tmp_download_urls?.find(
+      (entry) => entry.file_token === source.token
+    )?.tmp_download_url;
+    if (!temporaryUrl) throw new Error("Feishu did not return a temporary URL for this video");
+
+    let destination;
+    try {
+      destination = new URL(temporaryUrl);
+    } catch {
+      throw new Error("Feishu returned an invalid temporary URL");
+    }
+    const trustedHost = destination.hostname === "feishu.cn"
+      || destination.hostname.endsWith(".feishu.cn");
+    if (destination.protocol !== "https:" || !trustedHost) {
+      throw new Error("Feishu returned an untrusted temporary URL host");
+    }
+
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: destination.href,
+        "cache-control": "private, max-age=3600",
+        "referrer-policy": "no-referrer",
+        "x-content-type-options": "nosniff"
+      }
+    });
+  } catch (error) {
+    console.error(JSON.stringify({
+      event: "feishu_video_redirect_failed",
+      videoId: context.params.id,
+      reason: error instanceof Error ? error.message : "Unknown error"
+    }));
+    return new Response("Feishu video redirect is not configured", {
+      status: 503,
+      headers: { "cache-control": "no-store" }
+    });
+  }
+}
+
+async function handleVideoRequest(context) {
+  const delivery = new URL(context.request.url).searchParams.get("delivery");
+  return delivery === "direct" ? redirectVideoToFeishu(context) : streamVideo(context);
+}
+
+export const onRequestGet = handleVideoRequest;
+export const onRequestHead = handleVideoRequest;

@@ -1,0 +1,255 @@
+/* ============================================================
+   Header：品牌 + 分区导航 + 联系方式
+
+   布局说明（配合 main.jsx 的 Header 组件）：
+   桌面端（≥721px）标准三栏 —— 品牌靠左、导航居中、联系按钮靠右。
+   移动端（≤720px）隐藏导航，改由汉堡菜单承载。
+
+   为什么需要这组覆盖：既有 .site-header 里 .brand 是绝对定位居中、
+   .header-actions 为 display:contents 且其按钮继承 grid-column:2。
+   三者共存时 brand 会与居中导航重叠、两个按钮也会叠在同一栏，
+   因此这里显式把它们钉回各自栏位。
+   ============================================================ */
+
+.header-nav {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 1.7vw, 26px);
+  min-width: 0;
+  /* Header 继承拉丁装饰字体，中文会回退到系统字体导致字重不协调，
+     这里显式改用中文字体 + 常规字重。 */
+  font-family: "Source Han Sans Medium", "PingFang SC", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.header-nav a {
+  position: relative;
+  padding: 6px 0;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.header-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 220ms ease;
+}
+
+.header-nav a:hover {
+  color: var(--ink);
+}
+
+.header-nav a.is-active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.header-nav a.is-active::after {
+  transform: scaleX(1);
+}
+
+.header-nav a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---- 汉堡按钮（桌面隐藏） ---- */
+.header-menu-button {
+  display: none;
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.header-menu-bar {
+  display: block;
+  width: 19px;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform 220ms ease;
+}
+
+.header-menu-button[aria-expanded="true"] .header-menu-bar:first-child {
+  transform: translateY(3.25px) rotate(45deg);
+}
+
+.header-menu-button[aria-expanded="true"] .header-menu-bar:last-child {
+  transform: translateY(-3.25px) rotate(-45deg);
+}
+
+.header-menu-button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---- 移动端下拉面板 ---- */
+.header-mobile-menu {
+  position: fixed;
+  inset: 52px 0 auto;
+  z-index: 19;
+  padding: 20px 24px 26px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 18px 40px rgba(16, 18, 22, 0.12);
+}
+
+.header-mobile-menu nav {
+  display: grid;
+  gap: 2px;
+}
+
+.header-mobile-menu nav a {
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.header-mobile-menu nav a.is-active {
+  font-weight: 700;
+}
+
+.header-mobile-menu nav a:last-child {
+  border-bottom: 0;
+}
+
+.header-mobile-menu .soft-button {
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 20px;
+}
+
+@media (min-width: 721px) {
+  .header-mobile-menu {
+    display: none !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .header-nav {
+    display: none;
+  }
+
+  .header-menu-button {
+    display: inline-flex;
+  }
+}
+
+/* ============================================================
+   Header 布局修正
+
+   ≤720px 时既有规则用 display:none !important 隐藏整条 .site-header，
+   移动端改用 Header 内的品牌 + 汉堡按钮，因此必须在此恢复显示，
+   否则移动端完全看不到导航入口。
+   ============================================================ */
+@media (min-width: 721px) {
+  .site-header {
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    column-gap: clamp(16px, 2.2vw, 32px);
+  }
+
+  /* 品牌：解除绝对定位，回到第一栏 */
+  .site-header .brand {
+    position: static;
+    inset: auto;
+    transform: none;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    align-self: center;
+    font-family: "Alibaba PuHuiTi 2.0 Bold", "PingFang SC", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .site-header .header-nav {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    overflow: hidden;
+  }
+
+  /* 按钮组：显式拆到第三栏，避免继承 grid-column:2 压住导航 */
+  .site-header .header-actions {
+    display: contents;
+  }
+
+  .site-header .header-actions .soft-button {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+  }
+
+  /* 「查看作品」与导航重复，收进导航后不再单独占位 */
+  .site-header .header-actions .dark-button {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .site-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 10px;
+  }
+
+  .site-header .brand {
+    position: static;
+    inset: auto;
+    transform: none;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    align-self: center;
+    font-family: "Alibaba PuHuiTi 2.0 Bold", "PingFang SC", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .site-header .header-actions .dark-button {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-nav a,
+  .header-nav a::after,
+  .header-menu-bar {
+    transition: none;
+  }
+}
